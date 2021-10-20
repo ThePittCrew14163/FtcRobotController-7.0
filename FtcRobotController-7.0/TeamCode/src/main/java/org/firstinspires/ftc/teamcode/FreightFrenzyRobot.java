@@ -23,6 +23,14 @@ class FreightFrenzyRobot {
     public DcMotor wheel2;
     public DcMotor wheel3;
     public DcMotor wheel4;
+    public DcMotor intake;
+    public DcMotor intakeHinge;
+    public DcMotor carouselTurner;
+    public DcMotor lift;
+    public Servo dispenserPivot;
+    public Servo dispenserFlap;
+    public Servo teamElementArm;
+    public Servo teamElementClaw;
     public Orientation angles; // used to get info from BNO055IMU
 
     LinearOpMode program; // the program using this module.  Robot requires access to the program to know when the program is trying to stop.
@@ -41,6 +49,14 @@ class FreightFrenzyRobot {
         wheel2 = hardwareMap.get(DcMotor.class, "wheel2");
         wheel3 = hardwareMap.get(DcMotor.class, "wheel3");
         wheel4 = hardwareMap.get(DcMotor.class, "wheel4");
+        intake = hardwareMap.get(DcMotor.class, "intake");
+        intakeHinge = hardwareMap.get(DcMotor.class, "intakeHinge");
+        carouselTurner = hardwareMap.get(DcMotor.class, "carouselTurner");
+        lift = hardwareMap.get(DcMotor.class, "lift");
+        dispenserPivot = hardwareMap.get(Servo.class, "dispenserPivot");
+        dispenserFlap = hardwareMap.get(Servo.class, "dispenserFlap");
+        teamElementArm = hardwareMap.get(Servo.class, "teamElementArm");
+        teamElementClaw = hardwareMap.get(Servo.class, "teamElementClaw");
 
         DriveBaseSetZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
