@@ -33,6 +33,8 @@ class FreightFrenzyRobot {
     public Servo teamElementClaw;
     public Orientation angles; // used to get info from BNO055IMU
 
+    public DriveWheelOdometer odometer;
+
     LinearOpMode program; // the program using this module.  Robot requires access to the program to know when the program is trying to stop.
 
     public void init(HardwareMap hardwareMap, LinearOpMode program) {
@@ -72,14 +74,18 @@ class FreightFrenzyRobot {
         wheel4.setZeroPowerBehavior(behavior);
     }
 
+    /**
+     * Makes the drivetrain forcefully stop.
+     * After the method is over the drivetrain ZeroPowerBehavior is left on FLOAT
+     * @param ms How long to spend forcing the robot to stop.
+     */
     public void BrakeRobot(int ms) {
-        wheel1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        wheel2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        wheel3.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        wheel4.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        this.DriveBaseSetZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         wheel1.setPower(0);
         wheel2.setPower(0);
         wheel3.setPower(0);
         wheel4.setPower(0);
+        this.odometer.odSleep(ms);
+        this.DriveBaseSetZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 }
