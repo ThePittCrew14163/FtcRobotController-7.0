@@ -29,7 +29,7 @@ public class DriveWheelOdometer {
     public double angle_adjust;
     public double x;
     public double y;
-    public final double CLICKS_PER_INCH = 560 / (3.5433 * Math.PI);
+    public final double CLICKS_PER_INCH = 560 / (3.5433 * (4/3) * Math.PI);
     /**
      * Distance from the left center wheel to the center of the robot.
      */
@@ -52,18 +52,19 @@ public class DriveWheelOdometer {
     public double last_x;
     public double last_y;
 
-    public double last_x_clicks = 0;
-    public double last_y_clicks = 0;
+    public double last_left_clicks = 0;
+    public double last_right_clicks = 0;
 
     public void init(BNO055IMU imu, DcMotor left_encoder, DcMotor right_encoder) {
         this.imu = imu;
         this.left_encoder = left_encoder;
         this.right_encoder = right_encoder;
-        this.angle_adjust = this.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - this.angle;
+        this.angle_adjust = this.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS).firstAngle - this.angle;
         this.left_encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.right_encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.left_encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         this.right_encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
     }
 
     /**
@@ -74,6 +75,40 @@ public class DriveWheelOdometer {
      */
     public ArrayList<Double> getCurrentCoordinates() {
         // TODO: Implement drive wheel odometry algorithm
+        // save previous coordinates
+        this.last_angle = this.angle; /////// T = Angle
+        this.last_x = this.x;
+        this.last_y = this.y;
+
+        // get new angle
+        try { this.angle = this.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS).firstAngle - this.angle_adjust; }
+        catch (Exception e) { this.angle = -this.angle_adjust; }
+
+        int l_clicks = this.left_encoder.getCurrentPosition();
+        int r_clicks = this.right_encoder.getCurrentPosition();
+
+        double l_change_inches = (l_clicks - this.last_left_clicks) / this.CLICKS_PER_INCH;
+        double r_change_inches = (r_clicks - this.last_right_clicks) / this.CLICKS_PER_INCH;
+
+        double average_change_inches = (l_clicks + r_clicks) / 2; //// D = change ////
+
+        double changed_angle = angle - last_angle; ////// DT = changed angle/////
+
+        double radius = average_change_inches/ angle; /////  R = inches  /////
+
+        double A = (Math.PI - angle)/2;
+
+        double b = Math.sin(changed_angle) * radius/Math.sin(A);
+
+        double change_X = Math.cos(angle) * b; ////// Dx = change in X  /////
+        double change_Y = Math.sin(angle) * b; ///// Dy = change in Y /////
+
+        this.x = this.last_x + change_X;
+        this.y = this.last_y + change_Y;
+
+        this.last_left_clicks = l_clicks;
+        this.last_right_clicks = r_clicks;
+
         ArrayList<Double> list = new ArrayList<Double>();
         list.add(this.angle);
         list.add(this.x);
