@@ -40,8 +40,8 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
         // TODO: Set servo initial positions
 
         //Start robot // TODO: Decide where to start the robot
-        robot.odometer.x = 12;
-        robot.odometer.y = 12; //TODO: fix/finish odometer for this season
+        robot.odometer.x = 0;
+        robot.odometer.y = 0; //TODO: fix/finish odometer for this season
 
         if (Math.abs(gamepad2.right_stick_x) + Math.abs(gamepad2.right_stick_y) > 0.2) {
             adjustAngle = Math.atan2(gamepad2.right_stick_x, -gamepad2.right_stick_y) + Math.PI / 2;
@@ -60,64 +60,18 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
 
             // #######################################################
             //  ###### CONTROLS TO MAKE THE DRIVE TRAIN MOVE. ######
-            robot.angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            // now use right stick input to get the robot's heading. the if statement ensures that the joystick is a distance away from the center where readings will be accurate.
-            if (Math.abs(gamepad1.right_stick_x) + Math.abs(gamepad1.right_stick_y) > 0.6) {
-                robotAngle = (-Math.atan2(gamepad1.right_stick_x, -gamepad1.right_stick_y) * 180 / Math.PI) - 90;
-                if (robotAngle <= -180) {
-                    robotAngle += 360;
-                }
-                if (robotAngle >= 180) {
-                    robotAngle -= 360;
-                }
-            }
-            if (gamepad1.left_stick_x != 0 || gamepad1.left_stick_y != 0) {
-                leftStickAngle = -Math.atan2(gamepad1.left_stick_x, -gamepad1.left_stick_y) + (Math.PI * 5 / 4);
-                if (leftStickAngle >= Math.PI) {
-                    leftStickAngle -= Math.PI * 2;
-                }
-                theta = robotAngle / 180 * Math.PI - leftStickAngle;
-                xWheelsPower = Math.cos(theta);
-                yWheelsPower = Math.sin(theta);
-            } else {
-                xWheelsPower = 0;
-                yWheelsPower = 0;
-            }
-            difference = robot.angles.firstAngle - robotAngle - (adjustAngle * 180) / Math.PI;
-            if (Math.abs(difference) > 180) {
-                if (difference < 0) {
-                    sign = -1;
-                } else {
-                    sign = 1;
-                }
-                difference = sign * (360 - Math.abs(difference));
-                speed = -(difference) / 80;
-            } else {
-                speed = (difference) / 80;
-            }
-
-            leftStickR = Math.sqrt((Math.pow(gamepad1.left_stick_x, 2) + Math.pow(gamepad1.left_stick_y, 2))) * 1.42;
-
-            // this code here ensures that the robot can turn without having to strafe or sit there making a whining noise.
-            double speed1 = speed, speed2 = speed; // speed1 is for the front wheels 1 and 2, and speed2 is for the back wheels 3 and 4.
-
-            if (0.1 <= Math.abs(speed) && Math.abs(speed) < 0.2) {
-                // only the back wheels move, meaning that the robot can turn but at a lower speed.
-                speed2 *= 2;
-                speed1 = 0;
-            } else if (Math.abs(speed) < 0.1) {
-                // at a certain threshold you'll get no movement, but the motors will whine. thus, it's best to just stop them.
-                speed1 = 0;
-                speed2 = 0;
-            }
-            robot.wheel1.setPower(yWheelsPower * leftStickR + speed1);
-            robot.wheel4.setPower(yWheelsPower * leftStickR - speed2);
-            robot.wheel2.setPower(xWheelsPower * leftStickR - speed1);
-            robot.wheel3.setPower(xWheelsPower * leftStickR + speed2);
+            robot.wheel1.setPower(-gamepad1.left_stick_y);
+            robot.wheel3.setPower(-gamepad1.left_stick_y);
+            robot.wheel2.setPower(-gamepad1.right_stick_y);
+            robot.wheel4.setPower(-gamepad1.right_stick_y);
 
             ArrayList<Double> list = robot.odometer.getCurrentCoordinates();
-            telemetry.addData("X value:", list.get(1));
-            telemetry.addData("Y value:", list.get(2));
+            telemetry.addData("Angle", list.get(0));
+            telemetry.addData("X value", list.get(1));
+            telemetry.addData("Y value", list.get(2));
+
+            telemetry.addData("Left power", -gamepad1.left_stick_y);
+            telemetry.addData("Right power", -gamepad1.right_stick_y);
 
 
             ////// UPDATE TELEMETRY //////
