@@ -12,25 +12,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-@TeleOp(name="Ultimate Goal Drive")
+@TeleOp(name="Freight Frenzy Drive")
 public class FreightFrenzyTeleOp extends LinearOpMode {
     public FreightFrenzyRobot robot = new FreightFrenzyRobot();
     double robotAngle = 0;  // heading (in degrees) robot is to maintain. is set by gamepad1.right_stick.
     double leftStickAngle = 0;
     double theta;  // difference between robot heading and the direction it should travel towards.
     double leftStickR = 0; // distance from 0-1 from gamepad1.left_stick center to edge. is used to set power level to drive train motors.
-    double xWheelsPower; // wheel 2 and 3 power
-    double yWheelsPower; // wheel 1 and 4 power
     double speed;  // speed adjustment for robot to turn towards robotAngle.
     double difference;
     double sign;
 
-    int flicker_delay = 250; // delay in ms
-    int last_flick = (int)System.currentTimeMillis();
     int intake_switch_delay = 500; // delay in ms
     int last_intake_switch = (int)System.currentTimeMillis();
-    boolean power_flywheel = false; // whether or not the flywheel should be on.
-    boolean turret_idle = true; // true= have the turret ready for accepting rings, false= aim the turret to shoot.
     public boolean run_intake = false;
 
     @Override
@@ -71,8 +65,37 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
             telemetry.addData("Y value", list.get(2));
 
             telemetry.addData("Left power", -gamepad1.left_stick_y);
-            telemetry.addData("Right power", -gamepad1.right_stick_y);
+            telemetry.addData("Right power", - gamepad1.right_stick_y);
 
+            //////////////////// GAMEPAD 1 ///////////////
+            //////////// INTAKE CONTROLS ///////////
+            if (gamepad1.left_bumper && (int)System.currentTimeMillis() - this.last_intake_switch >= intake_switch_delay) {
+                run_intake = !run_intake;
+                this.last_intake_switch = (int) System.currentTimeMillis();
+            }
+            if (gamepad1.right_bumper) {
+                robot.intake.setPower(-1);
+            } else if (!run_intake) {
+                robot.intake.setPower(0);
+            } else {
+                robot.intake.setPower(1);
+            }
+
+            if (gamepad1.right_trigger > 0.1) {
+                robot.motorTurnNoReset(1, robot.INTAKE_HINGE_DOWN_CLICKS, robot.intakeHinge);
+            } else if (gamepad1.left_trigger > 0.1) {
+                robot.motorTurnNoReset(1, robot.INTAKE_HINGE_UP_CLICKS, robot.intakeHinge);
+            }
+
+            //////////////////// GAMEPAD 2 ///////////////
+            robot.carouselTurner.setPower(gamepad2.left_stick_y);
+
+            if (gamepad2.left_trigger > 0){
+                robot.lift.setPower(gamepad2.left_trigger);
+            }
+            else {
+                robot.lift.setPower(-gamepad2.right_trigger);
+            }
 
             ////// UPDATE TELEMETRY //////
             telemetry.update();

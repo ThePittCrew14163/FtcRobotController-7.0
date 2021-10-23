@@ -31,6 +31,9 @@ class FreightFrenzyRobot {
 
     private final double MIN_POINT_BUFFER_INCHES = 7;
 
+    public final int INTAKE_HINGE_DOWN_CLICKS = -100;
+    public final int INTAKE_HINGE_UP_CLICKS = 0;
+
     private LinearOpMode program; // the program using this module.  Robot requires access to the program to know when the program is trying to stop.
 
     public void init(HardwareMap hardwareMap, LinearOpMode program) {
@@ -60,6 +63,16 @@ class FreightFrenzyRobot {
 
         wheel4.setDirection(DcMotorSimple.Direction.REVERSE);
         wheel2.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        intakeHinge.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        intakeHinge.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        odometer = new DriveWheelOdometer(0, 0, 0);
+        odometer.init(imu, wheel1, wheel2);
+
         this.program = program;
     }
 
@@ -195,6 +208,24 @@ class FreightFrenzyRobot {
         wheel4.setPower(0);
         wheel1.setPower(0);
         wheel3.setPower(0);
+    }
+
+    public void motorTurnNoReset(double speed, int clicks, DcMotor motor) {
+        // has motor turn clicks at speed. Not very complicated.
+        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motor.setTargetPosition(clicks);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(speed);
+    }
+    public void motorTurn(double speed, int clicks, DcMotor motor) {
+        // has motor turn clicks at speed. Not very complicated.
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setTargetPosition(clicks);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(speed);
+        while (motor.isBusy() && !this.program.isStopRequested()) {}
+        motor.setPower(0);
+        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     private double PythagoreanTheorem(double a, double b) {
