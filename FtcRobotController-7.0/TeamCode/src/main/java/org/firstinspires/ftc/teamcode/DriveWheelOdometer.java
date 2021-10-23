@@ -16,6 +16,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -25,11 +26,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import java.util.ArrayList;
 
 public class DriveWheelOdometer {
-    public double angle;
-    public double angle_adjust;
-    public double x;
-    public double y;
-    public final double CLICKS_PER_INCH = 560 / (3.5433 * (4/3) * Math.PI);
+    public double angle = 0;
+    public double angle_adjust = 0;
+    public double x = 0;
+    public double y = 0;
+    public final double CLICKS_PER_INCH = 315 / (3.5433 * Math.PI);
     /**
      * Distance from the left center wheel to the center of the robot.
      */
@@ -48,14 +49,16 @@ public class DriveWheelOdometer {
     public DcMotor left_encoder;
     public DcMotor right_encoder;
 
-    public double last_angle;
-    public double last_x;
-    public double last_y;
+    public double last_angle = angle;
+    public double last_x = x;
+    public double last_y = x;
 
     public double last_left_clicks = 0;
     public double last_right_clicks = 0;
 
-    public void init(BNO055IMU imu, DcMotor left_encoder, DcMotor right_encoder) {
+    public LinearOpMode program;
+
+    public void init(BNO055IMU imu, DcMotor left_encoder, DcMotor right_encoder, LinearOpMode program) {
         this.imu = imu;
         this.left_encoder = left_encoder;
         this.right_encoder = right_encoder;
@@ -64,7 +67,7 @@ public class DriveWheelOdometer {
         this.right_encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.left_encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         this.right_encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+        this.program = program;
     }
 
     /**
@@ -74,9 +77,8 @@ public class DriveWheelOdometer {
      * @return The current angle, x and y coordinates relative to where the robot started.
      */
     public ArrayList<Double> getCurrentCoordinates() {
-        // TODO: Implement drive wheel odometry algorithm
         // save previous coordinates
-        this.last_angle = this.angle; /////// T = Angle
+        this.last_angle = this.angle;
         this.last_x = this.x;
         this.last_y = this.y;
 
@@ -89,19 +91,33 @@ public class DriveWheelOdometer {
 
         double l_change_inches = (l_clicks - this.last_left_clicks) / this.CLICKS_PER_INCH;
         double r_change_inches = (r_clicks - this.last_right_clicks) / this.CLICKS_PER_INCH;
+        this.program.telemetry.addData("l_change_inches", l_change_inches);
+        this.program.telemetry.addData("r_change_inches", r_change_inches);
 
-        double average_change_inches = (l_clicks + r_clicks) / 2; //// D = change ////
+        double changed_angle = angle - last_angle;
+        this.program.telemetry.addData("changed_angle", changed_angle);
 
-        double changed_angle = angle - last_angle; ////// DT = changed angle/////
+        double average_change_inches = (l_change_inches + r_change_inches) / 2;
+        this.program.telemetry.addData("average_change_inches", average_change_inches);
 
-        double radius = average_change_inches/ angle; /////  R = inches  /////
+        double line_traveled;
+        if (changed_angle == 0) {
+            line_traveled = average_change_inches;
+        } else {
+            double radius = average_change_inches / changed_angle;
+            this.program.telemetry.addData("radius", radius);
 
-        double A = (Math.PI - angle)/2;
+            double relative_heading = (Math.PI - changed_angle) / 2;
+            this.program.telemetry.addData("relative_heading", relative_heading);
 
-        double b = Math.sin(changed_angle) * radius/Math.sin(A);
+            line_traveled = Math.sin(changed_angle) * radius / Math.sin(relative_heading);
+            this.program.telemetry.addData("line_traveled", line_traveled);
+        }
 
-        double change_X = Math.cos(angle) * b; ////// Dx = change in X  /////
-        double change_Y = Math.sin(angle) * b; ///// Dy = change in Y /////
+        double change_X = Math.cos(angle) * line_traveled;
+        double change_Y = Math.sin(angle) * line_traveled;
+        this.program.telemetry.addData("change_X", change_X);
+        this.program.telemetry.addData("change_Y", change_Y);
 
         this.x = this.last_x + change_X;
         this.y = this.last_y + change_Y;

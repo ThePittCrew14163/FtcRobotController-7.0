@@ -71,7 +71,7 @@ class FreightFrenzyRobot {
         intakeHinge.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         odometer = new DriveWheelOdometer(0, 0, 0);
-        odometer.init(imu, wheel1, wheel2);
+        odometer.init(imu, wheel1, wheel2, program);
 
         this.program = program;
     }
