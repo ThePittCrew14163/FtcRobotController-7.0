@@ -7,10 +7,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 @TeleOp(name="Freight Frenzy Drive")
 public class FreightFrenzyTeleOp extends LinearOpMode {
@@ -54,6 +51,8 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
 
             // #######################################################
             //  ###### CONTROLS TO MAKE THE DRIVE TRAIN MOVE. ######
+            // TODO: Replace these controls wih field-centric driving
+            //  (we can't go straight forward reliably with the current controls)
             robot.wheel1.setPower(-gamepad1.left_stick_y);
             robot.wheel3.setPower(-gamepad1.left_stick_y);
             robot.wheel2.setPower(-gamepad1.right_stick_y);

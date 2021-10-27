@@ -25,11 +25,14 @@ class FreightFrenzyRobot {
     public Servo dispenserFlap;
     public Servo teamElementArm;
     public Servo teamElementClaw;
+    public Servo intakeFlap;
     public Orientation angles; // used to get info from BNO055IMU
 
     public DriveWheelOdometer odometer;
 
     private final double MIN_POINT_BUFFER_INCHES = 7;
+
+    public final double MIN_DRIVE_BASE_TURN_POWER = 0.18;
 
     public final int INTAKE_HINGE_DOWN_CLICKS = -100;
     public final int INTAKE_HINGE_UP_CLICKS = 0;
@@ -58,6 +61,7 @@ class FreightFrenzyRobot {
         dispenserFlap = hardwareMap.get(Servo.class, "dispenserFlap");
         teamElementArm = hardwareMap.get(Servo.class, "teamElementArm");
         teamElementClaw = hardwareMap.get(Servo.class, "teamElementClaw");
+        intakeFlap = hardwareMap.get(Servo.class, "intakeFlap");
 
         SetDriveBaseZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -109,19 +113,36 @@ class FreightFrenzyRobot {
     /**
      * Has robot turn at speed power to heading degrees. degrees should be 180 >= degrees >= -180.
      * millis is a time limit on the method in milliseconds.
-     * @param degrees
-     * @param speed
-     * @param millis
+     * @param degrees Field-relative heading the robot is to turn to (0 is towards the carousels, 90 is towards the red side, -90 is towards the blue side)
+     * @param speed motor power the robot is to turn at.
+     * @param millis time limit in milliseconds for this method. If time runs out, the method just ends.
      */
     public void odTurn(double degrees, double speed, int millis) {
-        double difference, sign, correct, final_speed, start = (int)System.currentTimeMillis();
+        odTurn(degrees, speed, millis, 0.008);
+    }
+    /**
+     * Has robot turn at speed power to heading degrees. degrees should be 180 >= degrees >= -180.
+     * millis is a time limit on the method in milliseconds.
+     * @param degrees Field-relative heading the robot is to turn to (0 is towards the carousels, 90 is towards the red side, -90 is towards the blue side)
+     * @param speed motor power the robot is to turn at.
+     * @param millis time limit in milliseconds for this method. If time runs out, the method just ends.
+     * @param adjustPower basically, how little the robot eases into the correct heading. adjustPower of > 0.05 is probably a LOT. Default is 0.008.
+     */
+    public void odTurn(double degrees, double speed, int millis, double adjustPower) {
+        double difference, sign, correct, angle, final_speed, start = (int)System.currentTimeMillis();
+
+        if (adjustPower < 0) { adjustPower = Math.abs(adjustPower);}
+        if (adjustPower > 1) { adjustPower = 1;}
+
         this.SetDriveBaseRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        double angle;
+
         ArrayList<Double> list = odometer.getCurrentCoordinates();
-        angle = Math.toRadians(list.get(0));
+        angle = Math.toDegrees(list.get(0));
+
         while (angle != degrees && !this.program.isStopRequested()) {
             list = odometer.getCurrentCoordinates();
-            angle = Math.toRadians(list.get(0));
+            angle = Math.toDegrees(list.get(0));
+
             difference = angle-degrees;
             if (difference < 0) { sign = -1;
             } else { sign = 1; }
@@ -129,16 +150,16 @@ class FreightFrenzyRobot {
             // make sure that the robot turn the correct direction
             if (Math.abs(difference) > 180) {
                 difference = sign * (360-Math.abs(difference));
-                correct = -(difference)/120;
+                correct = -(difference)*adjustPower;
                 if (Math.abs(correct) > 1) { correct = -sign; } // make sure that we don't correct so much that we give the motors greater power than speed.
             } else {
-                correct = (difference)/120;
+                correct = (difference)*adjustPower;
                 if (Math.abs(correct) > 1) { correct = sign; } // make sure that we don't correct so much that we give the motors greater power than speed.
             }
             final_speed = speed*correct;
-            if (Math.abs(final_speed) < 0.22) {
-                if (final_speed > 0) {final_speed = 0.22;}
-                if (final_speed < 0) {final_speed = -0.22;}
+            if (Math.abs(final_speed) < MIN_DRIVE_BASE_TURN_POWER) {
+                if (final_speed > 0) {final_speed = MIN_DRIVE_BASE_TURN_POWER;}
+                else if (final_speed < 0) {final_speed = -MIN_DRIVE_BASE_TURN_POWER;}
             }
             wheel2.setPower(-final_speed);
             wheel4.setPower(-final_speed);
@@ -154,13 +175,13 @@ class FreightFrenzyRobot {
         wheel3.setPower(0);
     }
 
-    public void odStrafe(double speed, double x, double y) {
-        odStrafe(speed, x, y, 0.02, 120000);
+    public void odMove(double speed, double x, double y) {
+        odMove(speed, x, y, 0.02, 120000);
     }
-    public void odStrafe(double speed, double x, double y, double adjustPower) {
-        odStrafe(speed, x, y, adjustPower, 120000);
+    public void odMove(double speed, double x, double y, double adjustPower) {
+        odMove(speed, x, y, adjustPower, 120000);
     }
-    public void odStrafe(double speed, double x, double y, double adjustPower, int millis) {
+    public void odMove(double speed, double x, double y, double adjustPower, int millis) {
         double start = (int)System.currentTimeMillis();
 
         if (speed > 1) { speed = 1;}
@@ -172,8 +193,10 @@ class FreightFrenzyRobot {
         double heading = Math.toDegrees(Math.atan2(y_dis, x_dis));
         if (speed < 0) { heading = (heading + 180)%360; }
 
-        int turn_ms = millis > 700 ? 700 : millis;
-        this.odTurn(heading, Math.abs(speed), turn_ms);
+        if (Math.abs(heading - list.get(0)) > 10) {
+            int turn_ms = Math.min(millis, 700);
+            this.odTurn(heading, Math.abs(speed), turn_ms);
+        }
 
         list = odometer.getCurrentCoordinates();
         double distance_to_go = PythagoreanTheorem(x - list.get(1), y - list.get(2));

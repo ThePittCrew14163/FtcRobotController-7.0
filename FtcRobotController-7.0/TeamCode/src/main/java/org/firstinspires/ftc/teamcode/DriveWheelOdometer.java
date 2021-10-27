@@ -30,7 +30,7 @@ public class DriveWheelOdometer {
     public double angle_adjust = 0;
     public double x = 0;
     public double y = 0;
-    public final double CLICKS_PER_INCH = 315 / (3.5433 * Math.PI);
+    public final double CLICKS_PER_INCH = 420 / (3.5433 * Math.PI);
     /**
      * Distance from the left center wheel to the center of the robot.
      */
@@ -51,7 +51,7 @@ public class DriveWheelOdometer {
 
     public double last_angle = angle;
     public double last_x = x;
-    public double last_y = x;
+    public double last_y = y;
 
     public double last_left_clicks = 0;
     public double last_right_clicks = 0;
@@ -73,7 +73,7 @@ public class DriveWheelOdometer {
     /**
      * Calculates the robot's movement since this method was last called,
      * updating the current angle, x and y coordinates relative to where the robot started.
-     * x and y are in inches.
+     * angle is in radians; x and y are in inches.
      * @return The current angle, x and y coordinates relative to where the robot started.
      */
     public ArrayList<Double> getCurrentCoordinates() {
@@ -101,7 +101,8 @@ public class DriveWheelOdometer {
         this.program.telemetry.addData("average_change_inches", average_change_inches);
 
         double line_traveled;
-        if (changed_angle == 0) {
+        if (changed_angle == 0 || true) { // TODO: We're making this if statement always happen to not use the more complicated algorithm
+                                          //  Decide whether or not to use the more complicated algorithm, and move the simpler to it's own method.
             line_traveled = average_change_inches;
         } else {
             double radius = average_change_inches / changed_angle;
