@@ -19,6 +19,7 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
     double speed;  // speed adjustment for robot to turn towards robotAngle.
     double difference;
     double sign;
+    double theta;
 
     int intake_switch_delay = 500; // delay in ms
     int last_intake_switch = (int)System.currentTimeMillis();
@@ -48,6 +49,11 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            ArrayList<Double> list = robot.odometer.getCurrentCoordinates();
+
+
+
+
 
             // #######################################################
             //  ###### CONTROLS TO MAKE THE DRIVE TRAIN MOVE. ######
@@ -55,19 +61,60 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
             //  (we can't go straight forward reliably with the current controls)
             robot.wheel1.setPower(-gamepad1.left_stick_y);
             robot.wheel3.setPower(-gamepad1.left_stick_y);
-            robot.wheel2.setPower(-gamepad1.right_stick_y);
-            robot.wheel4.setPower(-gamepad1.right_stick_y);
+            robot.wheel2.setPower(-gamepad1.left_stick_y);
+            robot.wheel4.setPower(-gamepad1.left stick_y);
 
-            ArrayList<Double> list = robot.odometer.getCurrentCoordinates();
             telemetry.addData("Angle", list.get(0));
             telemetry.addData("X value", list.get(1));
             telemetry.addData("Y value", list.get(2));
 
             telemetry.addData("Left power", -gamepad1.left_stick_y);
-            telemetry.addData("Right power", - gamepad1.right_stick_y);
+            telemetry.addData("Right power", -gamepad1.left_stick_y);
 
             //////////////////// GAMEPAD 1 ///////////////
+
+            /////////////////// Drive Controls/////////////
+
+
+            if (Math.abs(gamepad1.right_stick_x) + Math.abs(gamepad1.right_stick_y) > 0.6) {
+                robotAngle = (-Math.atan2(gamepad1.right_stick_x, -gamepad1.right_stick_y) * 180 / Math.PI) - 90;
+                if (robotAngle <= -180) {
+                    robotAngle += 360;
+                }
+                if (robotAngle >= 180) {
+                    robotAngle -= 360;
+                }
+            }
+            if (gamepad1.left_stick_x != 0 || gamepad1.left_stick_y != 0) {
+                leftStickAngle = -Math.atan2(gamepad1.left_stick_x, -gamepad1.left_stick_y) + (Math.PI * 5 / 4);
+                if (leftStickAngle >= Math.PI) {
+                    leftStickAngle -= Math.PI * 2;
+                }
+                theta = robotAngle / 180 * Math.PI - leftStickAngle;
+                xWheelsPower = Math.cos(theta);
+                yWheelsPower = Math.sin(theta);
+            } else {
+                xWheelsPower = 0;
+                yWheelsPower = 0;
+            }
+            difference = robot.angles.firstAngle - robotAngle - (adjustAngle * 180) / Math.PI;
+            if (Math.abs(difference) > 180) {
+                if (difference < 0) {
+                    sign = -1;
+                } else {
+                    sign = 1;
+                }
+                difference = sign * (360 - Math.abs(difference));
+                speed = -(difference) / 80;
+            } else {
+                speed = (difference) / 80;
+            }
+
+            leftStickR = Math.sqrt((Math.pow(gamepad1.left_stick_x, 2) + Math.pow(gamepad1.left_stick_y, 2))) * 1.42;
+
             //////////// INTAKE CONTROLS ///////////
+
+
             if (gamepad1.left_bumper && (int)System.currentTimeMillis() - this.last_intake_switch >= intake_switch_delay) {
                 run_intake = !run_intake;
                 this.last_intake_switch = (int) System.currentTimeMillis();
