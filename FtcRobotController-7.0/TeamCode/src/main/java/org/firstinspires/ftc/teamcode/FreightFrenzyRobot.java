@@ -106,7 +106,7 @@ class FreightFrenzyRobot {
         wheel2.setPower(0);
         wheel3.setPower(0);
         wheel4.setPower(0);
-        this.odometer.odSleep(ms);
+        odometer.odSleep(ms);
         this.SetDriveBaseZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 

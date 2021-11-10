@@ -3,23 +3,16 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-
 import java.util.ArrayList;
 
 @TeleOp(name="Freight Frenzy Drive")
 public class FreightFrenzyTeleOp extends LinearOpMode {
     public FreightFrenzyRobot robot = new FreightFrenzyRobot();
-    double robotAngle = 0;  // heading (in degrees) robot is to maintain. is set by gamepad1.right_stick.
-    double leftStickAngle = 0;
-    double theta;  // difference between robot heading and the direction it should travel towards.
-    double leftStickR = 0; // distance from 0-1 from gamepad1.left_stick center to edge. is used to set power level to drive train motors.
-    double speed;  // speed adjustment for robot to turn towards robotAngle.
-    double difference;
-    double sign;
-    double theta;
+    double intendedRobotHeading = 0;  // heading (in radians) robot is to maintain. is set by gamepad1.right_stick.
+    double adjustAngle = 0;
+    final double MAX_HEADING_ERROR = Math.PI/18;
+    final double ADJUST_TURNING_POWER = 1;
+    final double ADJUST_DRIVING_POWER = 0.5;
 
     int intake_switch_delay = 500; // delay in ms
     int last_intake_switch = (int)System.currentTimeMillis();
@@ -28,7 +21,6 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot.init(hardwareMap, this);
-        double adjustAngle = 0;
         // TODO: Set servo initial positions
 
         //Start robot // TODO: Decide where to start the robot
@@ -36,9 +28,9 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
         robot.odometer.y = 0; //TODO: fix/finish odometer for this season
 
         if (Math.abs(gamepad2.right_stick_x) + Math.abs(gamepad2.right_stick_y) > 0.2) {
-            adjustAngle = Math.atan2(gamepad2.right_stick_x, -gamepad2.right_stick_y) + Math.PI / 2;
+            adjustAngle = Math.atan2(-gamepad2.right_stick_y, gamepad2.right_stick_x) + Math.PI / 2;
         }
-        robotAngle = -(adjustAngle * 180) / Math.PI;
+        intendedRobotHeading = adjustAngle;
         telemetry.addData("Status", "Initialized. Please do something already.");
         telemetry.addData("adjustAngle", (adjustAngle * 180) / Math.PI);
         telemetry.update();
@@ -51,18 +43,10 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
         while (opModeIsActive()) {
             ArrayList<Double> list = robot.odometer.getCurrentCoordinates();
 
-
-
-
-
             // #######################################################
             //  ###### CONTROLS TO MAKE THE DRIVE TRAIN MOVE. ######
             // TODO: Replace these controls wih field-centric driving
             //  (we can't go straight forward reliably with the current controls)
-            robot.wheel1.setPower(-gamepad1.left_stick_y);
-            robot.wheel3.setPower(-gamepad1.left_stick_y);
-            robot.wheel2.setPower(-gamepad1.left_stick_y);
-            robot.wheel4.setPower(-gamepad1.left stick_y);
 
             telemetry.addData("Angle", list.get(0));
             telemetry.addData("X value", list.get(1));
@@ -73,44 +57,47 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
 
             //////////////////// GAMEPAD 1 ///////////////
 
-            /////////////////// Drive Controls/////////////
-
-
+              //////////////// SETS THE HEADING
             if (Math.abs(gamepad1.right_stick_x) + Math.abs(gamepad1.right_stick_y) > 0.6) {
-                robotAngle = (-Math.atan2(gamepad1.right_stick_x, -gamepad1.right_stick_y) * 180 / Math.PI) - 90;
-                if (robotAngle <= -180) {
-                    robotAngle += 360;
-                }
-                if (robotAngle >= 180) {
-                    robotAngle -= 360;
-                }
-            }
-            if (gamepad1.left_stick_x != 0 || gamepad1.left_stick_y != 0) {
-                leftStickAngle = -Math.atan2(gamepad1.left_stick_x, -gamepad1.left_stick_y) + (Math.PI * 5 / 4);
-                if (leftStickAngle >= Math.PI) {
-                    leftStickAngle -= Math.PI * 2;
-                }
-                theta = robotAngle / 180 * Math.PI - leftStickAngle;
-                xWheelsPower = Math.cos(theta);
-                yWheelsPower = Math.sin(theta);
-            } else {
-                xWheelsPower = 0;
-                yWheelsPower = 0;
-            }
-            difference = robot.angles.firstAngle - robotAngle - (adjustAngle * 180) / Math.PI;
-            if (Math.abs(difference) > 180) {
-                if (difference < 0) {
-                    sign = -1;
-                } else {
-                    sign = 1;
-                }
-                difference = sign * (360 - Math.abs(difference));
-                speed = -(difference) / 80;
-            } else {
-                speed = (difference) / 80;
+                intendedRobotHeading = Math.atan2(-gamepad1.right_stick_y, gamepad1.right_stick_x) - Math.PI/2 + adjustAngle;
+                intendedRobotHeading %= (Math.PI*2);
             }
 
-            leftStickR = Math.sqrt((Math.pow(gamepad1.left_stick_x, 2) + Math.pow(gamepad1.left_stick_y, 2))) * 1.42;
+            if (Math.abs(list.get(0) - intendedRobotHeading) > MAX_HEADING_ERROR) {
+                int sign;
+                double correct;
+                double difference = list.get(0)-intendedRobotHeading;
+                if (difference < 0) { sign = -1;
+                } else { sign = 1; }
+
+                // make sure that the robot turn the correct direction
+                if (Math.abs(difference) > Math.PI) {
+                    difference = sign * (Math.PI*2 -Math.abs(difference));
+                    correct = -(difference)* ADJUST_TURNING_POWER;
+                    if (Math.abs(correct) > 1) { correct = -sign; } // make sure that we don't correct so much that we give the motors greater power than speed.
+                } else {
+                    correct = (difference)* ADJUST_TURNING_POWER;
+                    if (Math.abs(correct) > 1) { correct = sign; } // make sure that we don't correct so much that we give the motors greater power than speed.
+                }
+                if (Math.abs(correct) < robot.MIN_DRIVE_BASE_TURN_POWER) {
+                    if (correct > 0) {correct = robot.MIN_DRIVE_BASE_TURN_POWER;}
+                    else if (correct < 0) {correct = -robot.MIN_DRIVE_BASE_TURN_POWER;}
+                }
+                robot.wheel2.setPower(-correct);
+                robot.wheel4.setPower(-correct);
+                robot.wheel1.setPower(correct);
+                robot.wheel3.setPower(correct);
+            }
+            else {
+                double power = -gamepad1.left_stick_y, adjust = 0;
+                if (power != 0) {
+                    adjust = Math.abs(power)*(list.get(0) - intendedRobotHeading)*ADJUST_DRIVING_POWER;
+                }
+                robot.wheel2.setPower(power-adjust);
+                robot.wheel4.setPower(power-adjust);
+                robot.wheel1.setPower(power+adjust);
+                robot.wheel3.setPower(power+adjust);
+            }
 
             //////////// INTAKE CONTROLS ///////////
 
