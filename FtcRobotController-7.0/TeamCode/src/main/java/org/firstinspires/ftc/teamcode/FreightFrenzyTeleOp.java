@@ -11,7 +11,7 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
     double intendedRobotHeading = 0;  // heading (in radians) robot is to maintain. is set by gamepad1.right_stick.
     double adjustAngle = 0;
     final double MAX_HEADING_ERROR = Math.PI/18;
-    final double ADJUST_TURNING_POWER = 1;
+    final double ADJUST_TURNING_POWER = 0.5;
     final double ADJUST_DRIVING_POWER = 0.5;
 
     /**
@@ -124,6 +124,12 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
                 robot.intake.setPower(0);
             } else {
                 robot.intake.setPower(1);
+            }
+
+            if (gamepad1.x) {
+                robot.intakeFlap.setPosition(0.4);
+            } else if (gamepad1.b) {
+                robot.intakeFlap.setPosition(1);
             }
 
             if (gamepad1.right_trigger > 0.1) {
