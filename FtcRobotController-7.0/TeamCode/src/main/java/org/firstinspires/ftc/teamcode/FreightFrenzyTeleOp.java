@@ -14,10 +14,22 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
     final double ADJUST_TURNING_POWER = 1;
     final double ADJUST_DRIVING_POWER = 0.5;
 
-    int intake_switch_delay = 500; // delay in ms
+    /**
+     * delay in milliseconds
+     */
+    int intake_switch_delay = 500;
     int last_intake_switch = (int)System.currentTimeMillis();
     public boolean run_intake = false;
+    
+    /**
+     * delay in milliseconds
+     */
+    int dispenser_flap_switch_delay = 400;
+    int last_dispenser_flap_switch = last_intake_switch;
+    final double DISPENSER_FLAP_CLOSED_POSITION = 0.45;
 
+    boolean dispenserIsTurnedToTheRight = false;
+    
     @Override
     public void runOpMode() {
         robot.init(hardwareMap, this);
@@ -128,6 +140,31 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
             }
             else {
                 robot.lift.setPower(-gamepad2.right_trigger);
+            }
+
+
+            if (gamepad2.dpad_left) {
+                dispenserIsTurnedToTheRight = false;
+                robot.dispenserPivot.setPosition(0.9);
+            } else if (gamepad2.dpad_right) {
+                dispenserIsTurnedToTheRight = true;
+                robot.dispenserPivot.setPosition(0.1);
+            } else if (gamepad2.dpad_down || gamepad2.dpad_up) {
+                dispenserIsTurnedToTheRight = false;
+                robot.dispenserPivot.setPosition(0.5);
+            }
+
+            if (gamepad2.left_bumper && (int)System.currentTimeMillis() - this.last_dispenser_flap_switch >= dispenser_flap_switch_delay) {
+                double flapPos = robot.dispenserFlap.getPosition();
+                if (flapPos < DISPENSER_FLAP_CLOSED_POSITION-0.05 || flapPos > DISPENSER_FLAP_CLOSED_POSITION+0.05) {
+                    robot.dispenserFlap.setPosition(DISPENSER_FLAP_CLOSED_POSITION);
+                }
+                else if (dispenserIsTurnedToTheRight) {
+                    robot.dispenserFlap.setPosition(1);
+                } else {
+                    robot.dispenserFlap.setPosition(0);
+                }
+                this.last_dispenser_flap_switch = (int) System.currentTimeMillis();
             }
 
             ////// UPDATE TELEMETRY //////
