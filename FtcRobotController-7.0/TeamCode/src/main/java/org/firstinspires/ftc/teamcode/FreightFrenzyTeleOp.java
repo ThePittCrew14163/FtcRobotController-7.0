@@ -151,7 +151,7 @@ public class FreightFrenzyTeleOp extends LinearOpMode {
 
             if (gamepad2.dpad_left) {
                 dispenserIsTurnedToTheRight = false;
-                robot.dispenserPivot.setPosition(0.9);
+                robot.dispenserPivot.setPosition(0.8);
             } else if (gamepad2.dpad_right) {
                 dispenserIsTurnedToTheRight = true;
                 robot.dispenserPivot.setPosition(0.1);
