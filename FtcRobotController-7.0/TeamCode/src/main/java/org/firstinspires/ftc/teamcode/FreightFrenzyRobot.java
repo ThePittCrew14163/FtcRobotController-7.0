@@ -11,6 +11,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import java.util.ArrayList;
 
+/**
+ * FTC Robot for the Freight Frenzy season
+ *
+ * For autonomous code, odometry (x,y) is (0,0) for the back corner of the robot's alliance's warehouse.
+ */
 class FreightFrenzyRobot {
     public BNO055IMU imu;
     public DcMotor wheel1;

@@ -77,6 +77,17 @@ public class DriveWheelOdometer {
      * @return The current angle, x and y coordinates relative to where the robot started.
      */
     public ArrayList<Double> getCurrentCoordinates() {
+        return getCurrentCoordinates(false);
+    }
+
+    /**
+     * Calculates the robot's movement since this method was last called,
+     * updating the current angle, x and y coordinates relative to where the robot started.
+     * angle is in radians; x and y are in inches.
+     * @param useArcBasedAlgorithm Whether or not the robot uses a more complicated algorithm to calculate it's position.
+     * @return The current angle, x and y coordinates relative to where the robot started.
+     */
+    public ArrayList<Double> getCurrentCoordinates(boolean useArcBasedAlgorithm) {
         // save previous coordinates
         this.last_angle = this.angle;
         this.last_x = this.x;
@@ -101,8 +112,8 @@ public class DriveWheelOdometer {
         this.program.telemetry.addData("average_change_inches", average_change_inches);
 
         double line_traveled;
-        if (changed_angle == 0 || true) { // TODO: We're making this if statement always happen to not use the more complicated algorithm
-                                          //  Decide whether or not to use the more complicated algorithm, and move the simpler to it's own method.
+        if (changed_angle == 0 || !useArcBasedAlgorithm) { // TODO: We're making this if statement always happen to not use the more complicated algorithm
+                                                           //  Decide whether or not to use the more complicated algorithm, and move the simpler to it's own method.
             line_traveled = average_change_inches;
         } else {
             double radius = average_change_inches / changed_angle;
