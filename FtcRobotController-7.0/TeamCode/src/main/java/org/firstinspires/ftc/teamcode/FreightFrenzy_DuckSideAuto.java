@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Autonomous(name="Duck side (Red or Blue)")
-class FreightFrenzy_DuckSideAuto extends LinearOpMode {
+public class FreightFrenzy_DuckSideAuto extends LinearOpMode {
     public FreightFrenzyRobot robot = new FreightFrenzyRobot();
     Alliance side = Alliance.Red;
     int s = 1;
@@ -19,7 +19,7 @@ class FreightFrenzy_DuckSideAuto extends LinearOpMode {
             side = Alliance.Red;
             s = -1;
         }
-        robot.odometer.x = 6*s;
+        robot.odometer.x = 9*s;
         robot.odometer.y = 96;
 
         telemetry.addData("Status", "Initialized");

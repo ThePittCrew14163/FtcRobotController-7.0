@@ -26,7 +26,6 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
      */
     int dispenser_flap_switch_delay = 400;
     int last_dispenser_flap_switch = last_intake_switch;
-    final double DISPENSER_FLAP_CLOSED_POSITION = 0.45;
 
     boolean dispenserIsTurnedToTheRight = false;
     
@@ -43,6 +42,12 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             adjustAngle = Math.atan2(-gamepad2.right_stick_y, gamepad2.right_stick_x) + Math.PI / 2;
         }
         intendedRobotHeading = adjustAngle;
+
+
+        robot.motorTurnNoReset(1, robot.INTAKE_HINGE_UP_CLICKS, robot.intakeHinge);
+        robot.dispenserFlap.setPosition(robot.DISPENSER_FLAP_CLOSED_POSITION);
+        robot.dispenserPivot.setPosition(0.5);
+
         telemetry.addData("Status", "Initialized. Please do something already.");
         telemetry.addData("adjustAngle", (adjustAngle * 180) / Math.PI);
         telemetry.update();
@@ -162,8 +167,8 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
 
             if (gamepad2.left_bumper && (int)System.currentTimeMillis() - this.last_dispenser_flap_switch >= dispenser_flap_switch_delay) {
                 double flapPos = robot.dispenserFlap.getPosition();
-                if (flapPos < DISPENSER_FLAP_CLOSED_POSITION-0.05 || flapPos > DISPENSER_FLAP_CLOSED_POSITION+0.05) {
-                    robot.dispenserFlap.setPosition(DISPENSER_FLAP_CLOSED_POSITION);
+                if (flapPos < robot.DISPENSER_FLAP_CLOSED_POSITION-0.05 || flapPos > robot.DISPENSER_FLAP_CLOSED_POSITION+0.05) {
+                    robot.dispenserFlap.setPosition(robot.DISPENSER_FLAP_CLOSED_POSITION);
                 }
                 else if (dispenserIsTurnedToTheRight) {
                     robot.dispenserFlap.setPosition(1);
