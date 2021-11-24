@@ -39,8 +39,8 @@ class FreightFrenzyRobot {
 
     public final double MIN_DRIVE_BASE_TURN_POWER = 0.18;
 
-    public final int INTAKE_HINGE_DOWN_CLICKS = 0;
-    public final int INTAKE_HINGE_UP_CLICKS = -1000;
+    public final int INTAKE_HINGE_DOWN_CLICKS = 1050;
+    public final int INTAKE_HINGE_UP_CLICKS = 0;
 
     final double DISPENSER_FLAP_CLOSED_POSITION = 0.44;
 

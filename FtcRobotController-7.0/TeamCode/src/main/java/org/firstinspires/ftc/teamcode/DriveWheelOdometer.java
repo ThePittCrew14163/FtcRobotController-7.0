@@ -96,20 +96,21 @@ public class DriveWheelOdometer {
         // get new angle
         try { this.angle = this.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS).firstAngle - this.angle_adjust; }
         catch (Exception e) { this.angle = -this.angle_adjust; }
+        this.angle = this.angle+(Math.PI*2) % (Math.PI*2);
 
         int l_clicks = this.left_encoder.getCurrentPosition();
         int r_clicks = this.right_encoder.getCurrentPosition();
 
         double l_change_inches = (l_clicks - this.last_left_clicks) / this.CLICKS_PER_INCH;
         double r_change_inches = (r_clicks - this.last_right_clicks) / this.CLICKS_PER_INCH;
-        this.program.telemetry.addData("l_change_inches", l_change_inches);
-        this.program.telemetry.addData("r_change_inches", r_change_inches);
+        //this.program.telemetry.addData("l_change_inches", l_change_inches);
+        //this.program.telemetry.addData("r_change_inches", r_change_inches);
 
         double changed_angle = angle - last_angle;
-        this.program.telemetry.addData("changed_angle", changed_angle);
+        //this.program.telemetry.addData("changed_angle", changed_angle);
 
         double average_change_inches = (l_change_inches + r_change_inches) / 2;
-        this.program.telemetry.addData("average_change_inches", average_change_inches);
+        //this.program.telemetry.addData("average_change_inches", average_change_inches);
 
         double line_traveled;
         if (changed_angle == 0 || !useArcBasedAlgorithm) { // TODO: We're making this if statement always happen to not use the more complicated algorithm

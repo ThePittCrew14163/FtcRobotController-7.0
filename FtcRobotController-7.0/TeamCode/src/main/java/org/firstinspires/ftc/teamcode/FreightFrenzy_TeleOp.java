@@ -10,8 +10,9 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     public FreightFrenzyRobot robot = new FreightFrenzyRobot();
     double intendedRobotHeading = 0;  // heading (in radians) robot is to maintain. is set by gamepad1.right_stick.
     double adjustAngle = 0;
-    final double MAX_HEADING_ERROR = Math.PI/18;
-    final double ADJUST_TURNING_POWER = 0.5;
+    final double MAX_HEADING_ERROR = Math.PI/3;
+    final double MIN_HEADING_ERROR = Math.PI/16;
+    final double ADJUST_TURNING_POWER = 0.7;
     final double ADJUST_DRIVING_POWER = 0.5;
 
     /**
@@ -39,14 +40,17 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
         robot.odometer.y = 0; //TODO: fix/finish odometer for this season
 
         if (Math.abs(gamepad2.right_stick_x) + Math.abs(gamepad2.right_stick_y) > 0.2) {
-            adjustAngle = Math.atan2(-gamepad2.right_stick_y, gamepad2.right_stick_x) + Math.PI / 2;
+            adjustAngle = Math.atan2(-gamepad2.right_stick_y, gamepad2.right_stick_x) + Math.PI * 5 / 2;
         }
         intendedRobotHeading = adjustAngle;
 
 
         robot.motorTurnNoReset(1, robot.INTAKE_HINGE_UP_CLICKS, robot.intakeHinge);
+        robot.intakeFlap.setPosition(1);
+
         robot.dispenserFlap.setPosition(robot.DISPENSER_FLAP_CLOSED_POSITION);
         robot.dispenserPivot.setPosition(0.5);
+
 
         telemetry.addData("Status", "Initialized. Please do something already.");
         telemetry.addData("adjustAngle", (adjustAngle * 180) / Math.PI);
@@ -66,6 +70,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             //  (we can't go straight forward reliably with the current controls)
 
             telemetry.addData("Angle", list.get(0));
+            telemetry.addData("Intended angle", intendedRobotHeading);
             telemetry.addData("X value", list.get(1));
             telemetry.addData("Y value", list.get(2));
 
@@ -76,11 +81,12 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
 
               //////////////// SETS THE HEADING
             if (Math.abs(gamepad1.right_stick_x) + Math.abs(gamepad1.right_stick_y) > 0.6) {
-                intendedRobotHeading = Math.atan2(-gamepad1.right_stick_y, gamepad1.right_stick_x) - Math.PI/2 + adjustAngle;
+                intendedRobotHeading = Math.atan2(-gamepad1.right_stick_y, gamepad1.right_stick_x) + Math.PI*3/2 + adjustAngle;
                 intendedRobotHeading %= (Math.PI*2);
             }
 
-            if (Math.abs(list.get(0) - intendedRobotHeading) > MAX_HEADING_ERROR) {
+            double headingError = Math.abs(list.get(0) - intendedRobotHeading);
+            if (headingError > MAX_HEADING_ERROR || (Math.abs(gamepad1.left_stick_y) < 0.15 && headingError > MIN_HEADING_ERROR)) {
                 int sign;
                 double correct;
                 double difference = list.get(0)-intendedRobotHeading;
@@ -132,7 +138,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             }
 
             if (gamepad1.x) {
-                robot.intakeFlap.setPosition(0.4);
+                robot.intakeFlap.setPosition(0.5);
             } else if (gamepad1.b) {
                 robot.intakeFlap.setPosition(1);
             }
