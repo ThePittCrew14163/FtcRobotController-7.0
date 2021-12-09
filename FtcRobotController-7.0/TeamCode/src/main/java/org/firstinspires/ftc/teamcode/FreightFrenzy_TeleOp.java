@@ -82,7 +82,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
               //////////////// SETS THE HEADING
             if (Math.abs(gamepad1.right_stick_x) + Math.abs(gamepad1.right_stick_y) > 0.6) {
                 intendedRobotHeading = Math.atan2(-gamepad1.right_stick_y, gamepad1.right_stick_x) + Math.PI*3/2 + adjustAngle;
-                intendedRobotHeading %= (Math.PI*2);
+                intendedRobotHeading = (intendedRobotHeading + (Math.PI*2)) % (Math.PI*2);
             }
 
             double headingError = Math.abs(list.get(0) - intendedRobotHeading);
@@ -116,10 +116,10 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
                 if (power != 0) {
                     adjust = Math.abs(power)*(list.get(0) - intendedRobotHeading)*ADJUST_DRIVING_POWER;
                 }
-                robot.wheel2.setPower(power-adjust);
-                robot.wheel4.setPower(power-adjust);
-                robot.wheel1.setPower(power+adjust);
-                robot.wheel3.setPower(power+adjust);
+                robot.wheel2.setPower(power+adjust);
+                robot.wheel4.setPower(power+adjust);
+                robot.wheel1.setPower(power-adjust);
+                robot.wheel3.setPower(power-adjust);
             }
 
             //////////// INTAKE CONTROLS ///////////

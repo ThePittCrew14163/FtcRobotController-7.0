@@ -87,7 +87,7 @@ public class DriveWheelOdometer {
         // get new angle
         try { this.angle = this.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS).firstAngle - this.angle_adjust; }
         catch (Exception e) { this.angle = -this.angle_adjust; }
-        this.angle = this.angle+(Math.PI*2) % (Math.PI*2);
+        this.angle = (this.angle+(Math.PI*2)) % (Math.PI*2);
 
         int l_clicks = this.left_encoder.getCurrentPosition();
         int r_clicks = this.right_encoder.getCurrentPosition();
