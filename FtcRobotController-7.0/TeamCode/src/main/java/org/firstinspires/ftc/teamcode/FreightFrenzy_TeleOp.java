@@ -13,7 +13,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     final double MAX_HEADING_ERROR = Math.PI/3;
     final double MIN_HEADING_ERROR = Math.PI/16;
     final double ADJUST_TURNING_POWER = 0.7;
-    final double ADJUST_DRIVING_POWER = 0.5;
+    final double ADJUST_DRIVING_POWER = 5;
 
     /**
      * delay in milliseconds
@@ -116,10 +116,10 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
                 if (power != 0) {
                     adjust = Math.abs(power)*(list.get(0) - intendedRobotHeading)*ADJUST_DRIVING_POWER;
                 }
-                robot.wheel2.setPower(power+adjust);
-                robot.wheel4.setPower(power+adjust);
-                robot.wheel1.setPower(power-adjust);
-                robot.wheel3.setPower(power-adjust);
+                robot.wheel2.setPower(power-adjust);
+                robot.wheel4.setPower(power-adjust);
+                robot.wheel1.setPower(power+adjust);
+                robot.wheel3.setPower(power+adjust);
             }
 
             //////////// INTAKE CONTROLS ///////////

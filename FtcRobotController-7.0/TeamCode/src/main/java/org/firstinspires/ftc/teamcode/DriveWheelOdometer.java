@@ -30,7 +30,7 @@ public class DriveWheelOdometer {
     public double angle_adjust = 0;
     public double x = 0;
     public double y = 0;
-    public final double CLICKS_PER_INCH = 420 / (3.5433 * Math.PI);
+    public final double CLICKS_PER_INCH = (4/3) * 420 / (3.5433 * Math.PI);
     /**
      * Distance from the left center wheel to the center of the robot.
      */
@@ -114,8 +114,8 @@ public class DriveWheelOdometer {
             double right_wheel_motion_in_turning = changed_angle*RIGHT_DIS_FROM_CENTER;
             double left_wheel_motion_in_turning = changed_angle*LEFT_DIS_FROM_CENTER;
 
-            r_change_inches += right_wheel_motion_in_turning;
-            l_change_inches -= left_wheel_motion_in_turning;
+            r_change_inches -= right_wheel_motion_in_turning;
+            l_change_inches += left_wheel_motion_in_turning;
 
             line_traveled = (l_change_inches + r_change_inches) / 2;
 
