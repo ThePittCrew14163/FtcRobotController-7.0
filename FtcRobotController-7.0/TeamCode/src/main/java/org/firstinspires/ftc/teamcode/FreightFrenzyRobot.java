@@ -33,7 +33,7 @@ class FreightFrenzyRobot {
     public Servo intakeFlap;
     public Orientation angles; // used to get info from BNO055IMU
 
-    public DriveWheelOdometer odometer;
+    public Odometer odometer;
 
     private final double MIN_POINT_BUFFER_INCHES = 7;
 
@@ -81,8 +81,8 @@ class FreightFrenzyRobot {
         intakeHinge.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         intakeHinge.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        odometer = new DriveWheelOdometer(0, 0, 0);
-        odometer.init(imu, wheel1, wheel2, program);
+        odometer = new Odometer(0, 0, 0);
+        odometer.init(imu, wheel1, wheel2);
 
         this.program = program;
     }
