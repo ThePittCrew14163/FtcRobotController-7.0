@@ -133,23 +133,20 @@ class FreightFrenzyRobot {
      * @param degrees Field-relative heading the robot is to turn to (0 is towards the carousels, 90 is towards the red side, -90 is towards the blue side)
      * @param speed motor power the robot is to turn at.
      * @param millis time limit in milliseconds for this method. If time runs out, the method just ends.
-     * @param adjustPower basically, how little the robot eases into the correct heading. adjustPower of > 0.05 is probably a LOT. Default is 0.008.
+     * @param adjustPower basically, how harshly the robot settles into the correct heading. adjustPower of > 0.05 is probably a LOT. Default is 0.008.
      */
     public void odTurn(double degrees, double speed, int millis, double adjustPower) {
-        double difference, sign, correct, angle, final_speed, start = (int)System.currentTimeMillis();
-
-        if (adjustPower < 0) { adjustPower = Math.abs(adjustPower);}
-        if (adjustPower > 1) { adjustPower = 1;}
+        double difference, sign, correct, final_speed, start = (int)System.currentTimeMillis();
 
         this.SetDriveBaseRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        double angle;
         ArrayList<Double> list = odometer.getCurrentCoordinates();
-        angle = Math.toDegrees(list.get(0));
+        angle = list.get(0);
 
         while (angle != degrees && !this.program.isStopRequested()) {
             list = odometer.getCurrentCoordinates();
-            angle = Math.toDegrees(list.get(0));
-
+            angle = list.get(0);
             difference = angle-degrees;
             if (difference < 0) { sign = -1;
             } else { sign = 1; }
@@ -157,16 +154,16 @@ class FreightFrenzyRobot {
             // make sure that the robot turn the correct direction
             if (Math.abs(difference) > 180) {
                 difference = sign * (360-Math.abs(difference));
-                correct = -(difference)*adjustPower;
+                correct = -difference*adjustPower;
                 if (Math.abs(correct) > 1) { correct = -sign; } // make sure that we don't correct so much that we give the motors greater power than speed.
             } else {
-                correct = (difference)*adjustPower;
+                correct = difference*adjustPower;
                 if (Math.abs(correct) > 1) { correct = sign; } // make sure that we don't correct so much that we give the motors greater power than speed.
             }
             final_speed = speed*correct;
             if (Math.abs(final_speed) < MIN_DRIVE_BASE_TURN_POWER) {
                 if (final_speed > 0) {final_speed = MIN_DRIVE_BASE_TURN_POWER;}
-                else if (final_speed < 0) {final_speed = -MIN_DRIVE_BASE_TURN_POWER;}
+                if (final_speed < 0) {final_speed = -MIN_DRIVE_BASE_TURN_POWER;}
             }
             wheel2.setPower(-final_speed);
             wheel4.setPower(-final_speed);
@@ -182,58 +179,102 @@ class FreightFrenzyRobot {
         wheel3.setPower(0);
     }
 
-    public void odMove(double speed, double x, double y) {
-        odMove(speed, x, y, 0.02, 120000);
+    /**
+     * Robot travels facing heading going at speed to the point x, y (x and y are in inches).
+     *
+     * @param heading Field-relative angle (in degrees) that the robot is to remain facing as it moves
+     * @param speed Power for motors (from 0-1)
+     * @param x X coordinate on the field where the robot is to go
+     * @param y Y coordinate on the field where the robot is to go
+     */
+    public void odStrafe(double heading, double speed, double x, double y) {
+        odStrafe(heading, speed, x, y, 2);
     }
-    public void odMove(double speed, double x, double y, double adjustPower) {
-        odMove(speed, x, y, adjustPower, 120000);
+    /**
+     * Robot travels facing heading going at speed to the point x, y (x and y are in inches).
+     *
+     * @param heading Field-relative angle (in degrees) that the robot is to remain facing as it moves
+     * @param speed Power for motors (from 0-1)
+     * @param x X coordinate on the field where the robot is to go
+     * @param y Y coordinate on the field where the robot is to go
+     * @param buffer How close to (x, y) in inches the robot must get before the loop exits
+     */
+    public void odStrafe(double heading, double speed, double x, double y, double buffer) {
+        odStrafe(heading, speed, x, y, buffer, 120000);
     }
-    public void odMove(double speed, double x, double y, double adjustPower, int millis) {
+    /**
+     * Robot travels facing heading going at speed to the point x, y (x and y are in inches).
+     *
+     * @param heading Field-relative angle (in degrees) that the robot is to remain facing as it moves
+     * @param speed Power for motors (from 0-1)
+     * @param x X coordinate on the field where the robot is to go
+     * @param y Y coordinate on the field where the robot is to go
+     * @param buffer How close to (x, y) in inches the robot must get before the loop exits
+     * @param millis Maximum runtime this method is allowed (in milliseconds)
+     */
+    public void odStrafe(double heading, double speed, double x, double y, double buffer, int millis) {
+        odStrafe(heading, speed, x, y, buffer, millis, 0.02);
+    }
+    /**
+     * Robot travels facing heading going at speed to the point x, y (x and y are in inches).
+     *
+     * @param heading Field-relative angle (in degrees) that the robot is to remain facing as it moves
+     * @param speed Power for motors (from 0-1)
+     * @param x X coordinate on the field where the robot is to go
+     * @param y Y coordinate on the field where the robot is to go
+     * @param buffer How close to (x, y) in inches the robot must get before the loop exits
+     * @param millis Maximum runtime this method is allowed (in milliseconds)
+     * @param adjustPower How harshly the robot should correct its heading when it veers off
+     *                    (0.02 is medium; 0.1 is pretty harsh; 0.004 is very little)
+     */
+    public void odStrafe(double heading, double speed, double x, double y, double buffer, int millis, double adjustPower) {
+
+        SetDriveBaseRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        boolean offTarget = true;
         double start = (int)System.currentTimeMillis();
 
-        if (speed > 1) { speed = 1;}
-        if (speed < -1) { speed = -1;}
-        ArrayList<Double> list = odometer.getCurrentCoordinates();
+        while (offTarget && !this.program.isStopRequested()) {
+            ArrayList<Double> list = odometer.getCurrentCoordinates();
+            double angle = list.get(0);
 
-        double x_dis = x - list.get(1);
-        double y_dis = y - list.get(2);
-        double heading = Math.toDegrees(Math.atan2(y_dis, x_dis));
-        if (speed < 0) { heading = (heading + 180)%360; }
-
-        if (Math.abs(heading - list.get(0)) > 10) {
-            int turn_ms = Math.min(millis, 700);
-            this.odTurn(heading, Math.abs(speed), turn_ms);
-        }
-
-        list = odometer.getCurrentCoordinates();
-        double distance_to_go = PythagoreanTheorem(x - list.get(1), y - list.get(2));
-        while (distance_to_go > this.MIN_POINT_BUFFER_INCHES && this.program.isStopRequested() == false) {
-            list = odometer.getCurrentCoordinates();
-            x_dis = x - list.get(1);
-            y_dis = y - list.get(2);
-            heading = Math.toDegrees(Math.atan2(y_dis, x_dis));
-            distance_to_go = PythagoreanTheorem(x - list.get(1), y - list.get(2));
-
-            double correct_steering_power = (heading - list.get(0)) * adjustPower;
-
-            // correction never overwhelms the drive speed.
-            if (Math.abs(correct_steering_power) > Math.abs(speed)) {
-                if (correct_steering_power > 0) {
-                    correct_steering_power = Math.abs(speed);
-                } else {
-                    correct_steering_power = - Math.abs(speed);
-                }
+            double xdis = x - list.get(1);
+            double ydis = y - list.get(2);
+            if (PythagoreanTheorem(xdis, ydis) <= Math.abs(buffer)) {
+                offTarget = false;
+                continue;
             }
+            double radians = Math.atan2(-xdis, ydis);  // the direction the robot is supposed to go towards
 
-            wheel1.setPower(speed+correct_steering_power);
-            wheel3.setPower(speed+correct_steering_power);
-            wheel2.setPower(speed-correct_steering_power);
-            wheel4.setPower(speed-correct_steering_power);
+            double theta = ((heading/180)*Math.PI) - radians + Math.PI/4;
+            if (theta >= Math.PI) {
+                theta -= Math.PI*2;
+            } else if (theta < -Math.PI) {
+                theta += Math.PI*2;
+            }
+            double x_vector = Math.cos(theta);  // calculate ratio of x distance to y distance.
+            double y_vector = Math.sin(theta);
 
+            // complicated logic to make the robot correct if it turns a bit off heading.
+            double sign;
+            double difference = angle-heading;
+            if (Math.abs(difference) > 180) {
+                if (difference < 0) { sign = -1;
+                } else { sign = 1; }
+                difference = sign * (360-Math.abs(difference));
+                difference = -difference*adjustPower;
+            } else {
+                difference = difference*adjustPower;
+            }
+            wheel1.setPower((speed*y_vector)+difference);
+            wheel2.setPower((speed*x_vector)-difference);
+            wheel3.setPower((speed*x_vector)+difference);
+            wheel4.setPower((speed*y_vector)-difference);
             if (start+millis < (int)System.currentTimeMillis()) {
                 break;
             }
         }
+        // stop
         wheel2.setPower(0);
         wheel4.setPower(0);
         wheel1.setPower(0);
