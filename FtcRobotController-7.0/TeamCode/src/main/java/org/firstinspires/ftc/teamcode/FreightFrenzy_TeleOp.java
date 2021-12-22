@@ -3,17 +3,25 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+
 import java.util.ArrayList;
 
 @TeleOp(name="Freight Frenzy Drive")
 public class FreightFrenzy_TeleOp extends LinearOpMode {
     public FreightFrenzyRobot robot = new FreightFrenzyRobot();
-    double intendedRobotHeading = 0;  // heading (in radians) robot is to maintain. is set by gamepad1.right_stick.
+
     double adjustAngle = 0;
-    final double MAX_HEADING_ERROR = Math.PI/3;
-    final double MIN_HEADING_ERROR = Math.PI/16;
-    final double ADJUST_TURNING_POWER = 0.7;
-    final double ADJUST_DRIVING_POWER = 5;
+    double leftStickAngle = 0;
+    double theta;  // difference between robot heading and the direction it should travel towards.
+    double leftStickR = 0; // distance from 0-1 from gamepad1.left_stick center to edge. is used to set power level to drive train motors.
+    double xWheelsPower; // wheel 2 and 3 power
+    double yWheelsPower; // wheel 1 and 4 power
+    double speed;  // speed adjustment for robot to turn towards robotAngle.
+    double difference;
+    double sign;
 
     /**
      * delay in milliseconds
@@ -37,153 +45,81 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
 
         //Start robot // TODO: Decide where to start the robot
         robot.odometer.x = 0;
-        robot.odometer.y = 0; //TODO: fix/finish odometer for this season
+        robot.odometer.y = 0;
 
         if (Math.abs(gamepad2.right_stick_x) + Math.abs(gamepad2.right_stick_y) > 0.2) {
-            adjustAngle = Math.atan2(-gamepad2.right_stick_y, gamepad2.right_stick_x) + Math.PI * 5 / 2;
+            adjustAngle = Math.atan2(gamepad2.right_stick_x, -gamepad2.right_stick_y) + Math.PI / 2;
         }
-        intendedRobotHeading = adjustAngle;
-
-
-        robot.motorTurnNoReset(1, robot.INTAKE_HINGE_UP_CLICKS, robot.armHinge);
-        robot.intakeFlap.setPosition(1);
-
-        robot.dispenserFlap.setPosition(robot.DISPENSER_FLAP_CLOSED_POSITION);
-        robot.dispenserPivot.setPosition(0.5);
-
-
-        telemetry.addData("Status", "Initialized. Please do something already.");
-        telemetry.addData("adjustAngle", (adjustAngle * 180) / Math.PI);
-        telemetry.update();
+        adjustAngle = -(adjustAngle * 180) / Math.PI;
 
         // Wait for the game to start
 
         waitForStart();
 
         // run until the end of the match (driver presses STOP)
+        ArrayList<Double> list;
         while (opModeIsActive()) {
-            ArrayList<Double> list = robot.odometer.getCurrentCoordinates();
-
-            // #######################################################
+            list = robot.odometer.getCurrentCoordinates();// #######################################################
             //  ###### CONTROLS TO MAKE THE DRIVE TRAIN MOVE. ######
-            // TODO: Replace these controls wih field-centric driving
-            //  (we can't go straight forward reliably with the current controls)
-
-            telemetry.addData("Angle", list.get(0));
-            telemetry.addData("Intended angle", intendedRobotHeading);
-            telemetry.addData("X value", list.get(1));
-            telemetry.addData("Y value", list.get(2));
-
-            telemetry.addData("Left power", -gamepad1.left_stick_y);
-            telemetry.addData("Right power", -gamepad1.left_stick_y);
-
-            //////////////////// GAMEPAD 1 ///////////////
-
-              //////////////// SETS THE HEADING
+            robot.angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            // now use right stick input to get the robot's heading. the if statement ensures that the joystick is a distance away from the center where readings will be accurate.
             if (Math.abs(gamepad1.right_stick_x) + Math.abs(gamepad1.right_stick_y) > 0.6) {
-                intendedRobotHeading = Math.atan2(-gamepad1.right_stick_y, gamepad1.right_stick_x) + Math.PI*3/2 + adjustAngle;
-                intendedRobotHeading = (intendedRobotHeading + (Math.PI*2)) % (Math.PI*2);
-            }
-
-            double headingError = Math.abs(list.get(0) - intendedRobotHeading);
-            if (headingError > MAX_HEADING_ERROR || (Math.abs(gamepad1.left_stick_y) < 0.15 && headingError > MIN_HEADING_ERROR)) {
-                int sign;
-                double correct;
-                double difference = list.get(0)-intendedRobotHeading;
-                if (difference < 0) { sign = -1;
-                } else { sign = 1; }
-
-                // make sure that the robot turn the correct direction
-                if (Math.abs(difference) > Math.PI) {
-                    difference = sign * (Math.PI*2 -Math.abs(difference));
-                    correct = -(difference)* ADJUST_TURNING_POWER;
-                    if (Math.abs(correct) > 1) { correct = -sign; } // make sure that we don't correct so much that we give the motors greater power than speed.
-                } else {
-                    correct = (difference)* ADJUST_TURNING_POWER;
-                    if (Math.abs(correct) > 1) { correct = sign; } // make sure that we don't correct so much that we give the motors greater power than speed.
+                adjustAngle = (-Math.atan2(gamepad1.right_stick_x, -gamepad1.right_stick_y) * 180 / Math.PI) - 90;
+                if (adjustAngle <= -180) {
+                    adjustAngle += 360;
                 }
-                if (Math.abs(correct) < robot.MIN_DRIVE_BASE_TURN_POWER) {
-                    if (correct > 0) {correct = robot.MIN_DRIVE_BASE_TURN_POWER;}
-                    else if (correct < 0) {correct = -robot.MIN_DRIVE_BASE_TURN_POWER;}
+                if (adjustAngle >= 180) {
+                    adjustAngle -= 360;
                 }
-                robot.wheel2.setPower(-correct);
-                robot.wheel4.setPower(-correct);
-                robot.wheel1.setPower(correct);
-                robot.wheel3.setPower(correct);
             }
-            else {
-                double power = -gamepad1.left_stick_y, adjust = 0;
-                if (power != 0) {
-                    adjust = Math.abs(power)*(list.get(0) - intendedRobotHeading)*ADJUST_DRIVING_POWER;
+            if (gamepad1.left_stick_x != 0 || gamepad1.left_stick_y != 0) {
+                leftStickAngle = -Math.atan2(gamepad1.left_stick_x, -gamepad1.left_stick_y) + (Math.PI * 5 / 4);
+                if (leftStickAngle >= Math.PI) {
+                    leftStickAngle -= Math.PI * 2;
                 }
-                robot.wheel2.setPower(power-adjust);
-                robot.wheel4.setPower(power-adjust);
-                robot.wheel1.setPower(power+adjust);
-                robot.wheel3.setPower(power+adjust);
-            }
-
-            //////////// INTAKE CONTROLS ///////////
-
-
-            if (gamepad1.left_bumper && (int)System.currentTimeMillis() - this.last_intake_switch >= intake_switch_delay) {
-                run_intake = !run_intake;
-                this.last_intake_switch = (int) System.currentTimeMillis();
-            }
-            if (gamepad1.right_bumper) {
-                robot.intake.setPower(-1);
-            } else if (!run_intake) {
-                robot.intake.setPower(0);
+                theta = adjustAngle / 180 * Math.PI - leftStickAngle;
+                xWheelsPower = Math.cos(theta);
+                yWheelsPower = Math.sin(theta);
             } else {
-                robot.intake.setPower(1);
+                xWheelsPower = 0;
+                yWheelsPower = 0;
             }
-
-            if (gamepad1.x) {
-                robot.intakeFlap.setPosition(0.5);
-            } else if (gamepad1.b) {
-                robot.intakeFlap.setPosition(1);
-            }
-
-            if (gamepad1.right_trigger > 0.1) {
-                robot.motorTurnNoReset(1, robot.INTAKE_HINGE_DOWN_CLICKS, robot.armHinge);
-            } else if (gamepad1.left_trigger > 0.1) {
-                robot.motorTurnNoReset(1, robot.INTAKE_HINGE_UP_CLICKS, robot.armHinge);
-            }
-
-            //////////////////// GAMEPAD 2 ///////////////
-            robot.armTurnstile.setPower(gamepad2.left_stick_y);
-
-            if (gamepad2.left_trigger > 0){
-                robot.duckSpinner.setPower(gamepad2.left_trigger);
-            }
-            else {
-                robot.duckSpinner.setPower(-gamepad2.right_trigger);
-            }
-
-
-            if (gamepad2.dpad_left) {
-                dispenserIsTurnedToTheRight = false;
-                robot.dispenserPivot.setPosition(0.8);
-            } else if (gamepad2.dpad_right) {
-                dispenserIsTurnedToTheRight = true;
-                robot.dispenserPivot.setPosition(0.1);
-            } else if (gamepad2.dpad_down || gamepad2.dpad_up) {
-                dispenserIsTurnedToTheRight = false;
-                robot.dispenserPivot.setPosition(0.5);
-            }
-
-            if (gamepad2.left_bumper && (int)System.currentTimeMillis() - this.last_dispenser_flap_switch >= dispenser_flap_switch_delay) {
-                double flapPos = robot.dispenserFlap.getPosition();
-                if (flapPos < robot.DISPENSER_FLAP_CLOSED_POSITION-0.05 || flapPos > robot.DISPENSER_FLAP_CLOSED_POSITION+0.05) {
-                    robot.dispenserFlap.setPosition(robot.DISPENSER_FLAP_CLOSED_POSITION);
-                }
-                else if (dispenserIsTurnedToTheRight) {
-                    robot.dispenserFlap.setPosition(1);
+            difference = robot.angles.firstAngle - adjustAngle - (this.adjustAngle * 180) / Math.PI;
+            if (Math.abs(difference) > 180) {
+                if (difference < 0) {
+                    sign = -1;
                 } else {
-                    robot.dispenserFlap.setPosition(0);
+                    sign = 1;
                 }
-                this.last_dispenser_flap_switch = (int) System.currentTimeMillis();
+                difference = sign * (360 - Math.abs(difference));
+                speed = -(difference) / 80;
+            } else {
+                speed = (difference) / 80;
             }
 
+            leftStickR = Math.sqrt((Math.pow(gamepad1.left_stick_x, 2) + Math.pow(gamepad1.left_stick_y, 2))) * 1.42;
+
+            // this code here ensures that the robot can turn without having to strafe or sit there making a whining noise.
+            double speed1 = speed, speed2 = speed; // speed1 is for the front wheels 1 and 2, and speed2 is for the back wheels 3 and 4.
+
+            if (0.1 <= Math.abs(speed) && Math.abs(speed) < 0.2) {
+                // only the back wheels move, meaning that the robot can turn but at a lower speed.
+                speed2 *= 2;
+                speed1 = 0;
+            } else if (Math.abs(speed) < 0.1) {
+                // at a certain threshold you'll get no movement, but the motors will whine. thus, it's best to just stop them.
+                speed1 = 0;
+                speed2 = 0;
+            }
+            robot.wheel1.setPower(yWheelsPower * leftStickR + speed1);
+            robot.wheel4.setPower(yWheelsPower * leftStickR - speed2);
+            robot.wheel2.setPower(xWheelsPower * leftStickR - speed1);
+            robot.wheel3.setPower(xWheelsPower * leftStickR + speed2);
+
+            // TODO: Add controls for all of the other parts of the robot
+
+            telemetry.addData("Odo-given X", list.get(1));
+            telemetry.addData("Odo-given Y", list.get(2));
             ////// UPDATE TELEMETRY //////
             telemetry.update();
         }
