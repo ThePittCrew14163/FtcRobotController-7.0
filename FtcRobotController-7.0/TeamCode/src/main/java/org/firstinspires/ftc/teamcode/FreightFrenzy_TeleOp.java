@@ -45,7 +45,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
         intendedRobotHeading = adjustAngle;
 
 
-        robot.motorTurnNoReset(1, robot.INTAKE_HINGE_UP_CLICKS, robot.intakeHinge);
+        robot.motorTurnNoReset(1, robot.INTAKE_HINGE_UP_CLICKS, robot.armHinge);
         robot.intakeFlap.setPosition(1);
 
         robot.dispenserFlap.setPosition(robot.DISPENSER_FLAP_CLOSED_POSITION);
@@ -144,19 +144,19 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             }
 
             if (gamepad1.right_trigger > 0.1) {
-                robot.motorTurnNoReset(1, robot.INTAKE_HINGE_DOWN_CLICKS, robot.intakeHinge);
+                robot.motorTurnNoReset(1, robot.INTAKE_HINGE_DOWN_CLICKS, robot.armHinge);
             } else if (gamepad1.left_trigger > 0.1) {
-                robot.motorTurnNoReset(1, robot.INTAKE_HINGE_UP_CLICKS, robot.intakeHinge);
+                robot.motorTurnNoReset(1, robot.INTAKE_HINGE_UP_CLICKS, robot.armHinge);
             }
 
             //////////////////// GAMEPAD 2 ///////////////
-            robot.carouselTurner.setPower(gamepad2.left_stick_y);
+            robot.armTurnstile.setPower(gamepad2.left_stick_y);
 
             if (gamepad2.left_trigger > 0){
-                robot.lift.setPower(gamepad2.left_trigger);
+                robot.duckSpinner.setPower(gamepad2.left_trigger);
             }
             else {
-                robot.lift.setPower(-gamepad2.right_trigger);
+                robot.duckSpinner.setPower(-gamepad2.right_trigger);
             }
 
 

@@ -23,19 +23,17 @@ class FreightFrenzyRobot {
     public DcMotor wheel3;
     public DcMotor wheel4;
     public DcMotor intake;
-    public DcMotor intakeHinge;
-    public DcMotor carouselTurner;
-    public DcMotor lift;
-    public Servo dispenserPivot;
-    public Servo dispenserFlap;
-    public Servo teamElementArm;
-    public Servo teamElementClaw;
-    public Servo intakeFlap;
+    public DcMotor armTurnstile;
+    public DcMotor armHinge;
+    public DcMotor duckSpinner;
+    public Servo xOdoPodLift;
+    public Servo yOdoPodLift;
+    public Servo TSET_Turnstile;
+    public Servo TSET_Pivot;
+    public Servo TSET_Extender;
     public Orientation angles; // used to get info from BNO055IMU
 
     public Odometer odometer;
-
-    private final double MIN_POINT_BUFFER_INCHES = 7;
 
     public final double MIN_DRIVE_BASE_TURN_POWER = 0.18;
 
@@ -61,25 +59,27 @@ class FreightFrenzyRobot {
         wheel3 = hardwareMap.get(DcMotor.class, "wheel3");
         wheel4 = hardwareMap.get(DcMotor.class, "wheel4");
         intake = hardwareMap.get(DcMotor.class, "intake");
-        intakeHinge = hardwareMap.get(DcMotor.class, "intakeHinge");
-        carouselTurner = hardwareMap.get(DcMotor.class, "carouselTurner");
-        lift = hardwareMap.get(DcMotor.class, "lift");
-        dispenserPivot = hardwareMap.get(Servo.class, "dispenserPivot");
-        dispenserFlap = hardwareMap.get(Servo.class, "dispenserFlap");
-        teamElementArm = hardwareMap.get(Servo.class, "teamElementArm");
-        teamElementClaw = hardwareMap.get(Servo.class, "teamElementClaw");
-        intakeFlap = hardwareMap.get(Servo.class, "intakeFlap");
+        armTurnstile = hardwareMap.get(DcMotor.class, "armTurnstile");
+        armHinge = hardwareMap.get(DcMotor.class, "armHinge");
+        duckSpinner = hardwareMap.get(DcMotor.class, "duckSpinner");
+
+        xOdoPodLift = hardwareMap.get(Servo.class, "xOdoPodLift");
+        yOdoPodLift = hardwareMap.get(Servo.class, "yOdoPodLift");
+        TSET_Turnstile = hardwareMap.get(Servo.class, "TSET_Turnstile");
+        TSET_Pivot = hardwareMap.get(Servo.class, "TSET_Pivot");
+        TSET_Extender = hardwareMap.get(Servo.class, "TSET_Extender");
 
         SetDriveBaseZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         wheel4.setDirection(DcMotorSimple.Direction.REVERSE);
         wheel2.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        intakeHinge.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        intakeHinge.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armTurnstile.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armTurnstile.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armHinge.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armHinge.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        duckSpinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        duckSpinner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         odometer = new Odometer(0, 0, 0);
         odometer.init(imu, wheel1, wheel2);
