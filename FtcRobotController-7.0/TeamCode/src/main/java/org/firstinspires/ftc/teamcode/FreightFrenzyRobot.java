@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -25,7 +26,7 @@ class FreightFrenzyRobot {
     public DcMotor intake;
     public DcMotor armTurnstile;
     public DcMotor armHinge;
-    public DcMotor duckSpinner;
+    public DcMotorEx duckSpinner;
     public Servo xOdoPodLift;
     public Servo yOdoPodLift;
     public Servo TSET_Turnstile;
@@ -62,7 +63,7 @@ class FreightFrenzyRobot {
         intake = hardwareMap.get(DcMotor.class, "intake");
         armTurnstile = hardwareMap.get(DcMotor.class, "armTurnstile");
         armHinge = hardwareMap.get(DcMotor.class, "armHinge");
-        duckSpinner = hardwareMap.get(DcMotor.class, "duckSpinner");
+        duckSpinner = hardwareMap.get(DcMotorEx.class, "duckSpinner");
 
         xOdoPodLift = hardwareMap.get(Servo.class, "xOdoPodLift");
         yOdoPodLift = hardwareMap.get(Servo.class, "yOdoPodLift");

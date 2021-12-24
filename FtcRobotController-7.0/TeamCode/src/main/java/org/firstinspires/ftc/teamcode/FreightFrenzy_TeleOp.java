@@ -29,14 +29,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     int intake_switch_delay = 500;
     int last_intake_switch = (int)System.currentTimeMillis();
     public boolean run_intake = false;
-    
-    /**
-     * delay in milliseconds
-     */
-    int dispenser_flap_switch_delay = 400;
-    int last_dispenser_flap_switch = last_intake_switch;
 
-    boolean dispenserIsTurnedToTheRight = false;
     
     @Override
     public void runOpMode() {
@@ -123,7 +116,25 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
 
             // ###################################################################
             //  ###### OTHER GAMEPAD1 (A) CONTROLS (intake & duck spinner) ######
+            if (gamepad1.left_bumper && (int)System.currentTimeMillis() - this.last_intake_switch >= intake_switch_delay) {
+                run_intake = !run_intake;
+                this.last_intake_switch = (int) System.currentTimeMillis();
+            }
+            if (gamepad1.right_bumper) {
+                robot.intake.setPower(-1);
+            } else if (!run_intake) {
+                robot.intake.setPower(0);
+            } else {
+                robot.intake.setPower(1);
+            }
 
+            if (gamepad1.dpad_left) {
+                robot.duckSpinner.setVelocity(-50);
+            } else if (gamepad1.dpad_right) {
+                robot.duckSpinner.setVelocity(50);
+            } else {
+                robot.duckSpinner.setVelocity(0);
+            }
 
             // ##############################################################
             //  ######    GAMEPAD2 (B) CONTROLS (arm & TSE turret)    ######
