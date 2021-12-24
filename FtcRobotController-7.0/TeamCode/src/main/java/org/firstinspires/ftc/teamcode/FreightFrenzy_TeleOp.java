@@ -59,8 +59,11 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         ArrayList<Double> list;
         while (opModeIsActive()) {
-            list = robot.odometer.getCurrentCoordinates();// #######################################################
-            //  ###### CONTROLS TO MAKE THE DRIVE TRAIN MOVE. ######
+            list = robot.odometer.getCurrentCoordinates();
+
+
+            // ################################################################
+            //  ######      CONTROLS TO MAKE THE DRIVE TRAIN MOVE.      ######
             robot.angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             // now use right stick input to get the robot's heading. the if statement ensures that the joystick is a distance away from the center where readings will be accurate.
             if (Math.abs(gamepad1.right_stick_x) + Math.abs(gamepad1.right_stick_y) > 0.6) {
@@ -116,11 +119,19 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             robot.wheel2.setPower(xWheelsPower * leftStickR - speed1);
             robot.wheel3.setPower(xWheelsPower * leftStickR + speed2);
 
+
+
+            // ###################################################################
+            //  ###### OTHER GAMEPAD1 (A) CONTROLS (intake & duck spinner) ######
+
+
+            // ##############################################################
+            //  ######    GAMEPAD2 (B) CONTROLS (arm & TSE turret)    ######
             // TODO: Add controls for all of the other parts of the robot
 
             telemetry.addData("Odo-given X", list.get(1));
             telemetry.addData("Odo-given Y", list.get(2));
-            ////// UPDATE TELEMETRY //////
+            /////////////////     UPDATE TELEMETRY     /////////////////
             telemetry.update();
         }
     }
