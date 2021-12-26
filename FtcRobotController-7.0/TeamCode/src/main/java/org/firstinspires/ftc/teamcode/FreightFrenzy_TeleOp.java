@@ -30,7 +30,9 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     int last_intake_switch = (int)System.currentTimeMillis();
     public boolean run_intake = false;
 
-    
+    final double TSET_TURNSTILE_INCREMENT = 0.002;
+    final double TSET_PIVOT_INCREMENT = 0.002;
+
     @Override
     public void runOpMode() {
         robot.init(hardwareMap, this);
@@ -138,7 +140,27 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
 
             // ##############################################################
             //  ######    GAMEPAD2 (B) CONTROLS (arm & TSE turret)    ######
-            // TODO: Add controls for all of the other parts of the robot
+            // TODO: Add controls for the arm
+
+            if (gamepad2.left_bumper) {
+                robot.TSET_Turnstile.setPosition(robot.TSET_Turnstile.getPosition() - TSET_TURNSTILE_INCREMENT);
+            } else if (gamepad2.right_bumper) {
+                robot.TSET_Turnstile.setPosition(robot.TSET_Turnstile.getPosition() + TSET_TURNSTILE_INCREMENT);
+            }
+
+            if (gamepad2.dpad_left) {
+                robot.TSET_Pivot.setPosition(robot.TSET_Pivot.getPosition() - TSET_PIVOT_INCREMENT);
+            } else if (gamepad2.dpad_right) {
+                robot.TSET_Pivot.setPosition(robot.TSET_Pivot.getPosition() + TSET_PIVOT_INCREMENT);
+            }
+
+            if (gamepad2.b) {
+                robot.TSET_Extender.setPosition(0);
+            } else if (gamepad2.x) {
+                robot.TSET_Extender.setPosition(1);
+            } else {
+                robot.TSET_Extender.setPosition(0.5);
+            }
 
             telemetry.addData("Odo-given X", list.get(1));
             telemetry.addData("Odo-given Y", list.get(2));

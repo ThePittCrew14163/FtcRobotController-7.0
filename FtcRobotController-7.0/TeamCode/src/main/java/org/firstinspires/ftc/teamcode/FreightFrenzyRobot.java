@@ -31,6 +31,9 @@ class FreightFrenzyRobot {
     public Servo yOdoPodLift;
     public Servo TSET_Turnstile;
     public Servo TSET_Pivot;
+    /**
+     * A continuously rotating servo that extends and retracts the tape measure that scores the Team Shipping Element.
+     */
     public Servo TSET_Extender;
     public Orientation angles; // used to get info from BNO055IMU
 
