@@ -21,8 +21,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-
-import java.util.ArrayList;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class Odometer {
     public double angle;
@@ -59,7 +58,7 @@ public class Odometer {
         this.x_encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    public ArrayList<Double> getCurrentCoordinates() {
+    public OdometryPosition getCurrentPosition() {
         // returns the current angle, x and y coordinates relative to where the robot started.
         // x and y are in inches.
 
@@ -75,11 +74,16 @@ public class Odometer {
         double xc = this.x_encoder.getCurrentPosition(); // xc = x wheel clicks
         double hx = (this.last_x_clicks - xc) / this.CLICKS_PER_INCH;  // hx = distance traveled in the last frame by the x wheel
         this.last_x_clicks = xc;
-        // get new angle
-        try { this.angle = this.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - this.angle_adjust; }
-        catch (Exception e) { this.angle = -this.angle_adjust; }
 
-        double dis = hy, theta = 0;
+        // get new angle
+        Orientation imuOrientation = this.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        try {
+            this.angle = imuOrientation.firstAngle - this.angle_adjust;
+        } catch (Exception e) {
+            this.angle = -this.angle_adjust;
+        }
+
+        double theta = 0;
         // calculate new position
         // first check if the robot hasn't turned:
         if (this.last_angle - this.angle == 0 || this.last_angle - this.angle == 360 || this.last_angle - this.angle == -360) {
@@ -99,23 +103,22 @@ public class Odometer {
             this.x = last_x - (hy * Math.cos((angle+90)*Math.PI/180-(theta/2)) + hx * Math.cos(angle*Math.PI/180-(theta/2)));
             this.y = last_y - (hy * Math.sin((angle+90)*Math.PI/180-(theta/2)) + hx * Math.sin(angle*Math.PI/180-(theta/2)));
         }
-        ArrayList<Double> list = new ArrayList<Double>();
-        list.add(this.angle);
-        list.add(this.x);
-        list.add(this.y);
-        list.add(hx);
-        list.add(hy);
-        list.add(dis);
-        list.add(theta);
-        list.add(theta*X_DIS_FROM_CENTER);
-        return list;
+
+        return new OdometryPosition(
+                this.angle,
+                this.x,
+                this.y,
+                imuOrientation.secondAngle,
+                imuOrientation.thirdAngle
+        );
     }
+
     public void odSleep(int ms) {
         // tracks position while sleeping for ms milliseconds.
         double start = (int)System.currentTimeMillis();
         
         while (start+ms > (int)System.currentTimeMillis()) {
-            this.getCurrentCoordinates();
+            this.getCurrentPosition();
             try {
                 Thread.sleep(ms);
             } catch (InterruptedException ie) {

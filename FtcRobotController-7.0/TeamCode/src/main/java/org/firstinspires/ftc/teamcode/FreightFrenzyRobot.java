@@ -146,12 +146,12 @@ class FreightFrenzyRobot {
         this.SetDriveBaseRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         double angle;
-        ArrayList<Double> list = odometer.getCurrentCoordinates();
-        angle = list.get(0);
+        OdometryPosition position = odometer.getCurrentPosition();
+        angle = position.angle;
 
         while (angle != degrees && !this.program.isStopRequested()) {
-            list = odometer.getCurrentCoordinates();
-            angle = list.get(0);
+            position = odometer.getCurrentPosition();
+            angle = position.angle;
             difference = angle-degrees;
             if (difference < 0) { sign = -1;
             } else { sign = 1; }
@@ -240,11 +240,11 @@ class FreightFrenzyRobot {
         double start = (int)System.currentTimeMillis();
 
         while (offTarget && !this.program.isStopRequested()) {
-            ArrayList<Double> list = odometer.getCurrentCoordinates();
-            double angle = list.get(0);
+            OdometryPosition position = odometer.getCurrentPosition();
+            double angle = position.angle;
 
-            double xdis = x - list.get(1);
-            double ydis = y - list.get(2);
+            double xdis = x - position.x;
+            double ydis = y - position.y;
             if (PythagoreanTheorem(xdis, ydis) <= Math.abs(buffer)) {
                 offTarget = false;
                 continue;

@@ -7,8 +7,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
-import java.util.ArrayList;
-
 @TeleOp(name="Freight Frenzy Drive")
 public class FreightFrenzy_TeleOp extends LinearOpMode {
     public FreightFrenzyRobot robot = new FreightFrenzyRobot();
@@ -52,9 +50,9 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
         waitForStart();
 
         // run until the end of the match (driver presses STOP)
-        ArrayList<Double> list;
+        OdometryPosition position;
         while (opModeIsActive()) {
-            list = robot.odometer.getCurrentCoordinates();
+            position = robot.odometer.getCurrentPosition();
 
 
             // ################################################################
@@ -162,8 +160,8 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
                 robot.TSET_Extender.setPosition(0.5);
             }
 
-            telemetry.addData("Odo-given X", list.get(1));
-            telemetry.addData("Odo-given Y", list.get(2));
+            telemetry.addData("Odo-given X", position.x);
+            telemetry.addData("Odo-given Y", position.y);
             /////////////////     UPDATE TELEMETRY     /////////////////
             telemetry.update();
         }
