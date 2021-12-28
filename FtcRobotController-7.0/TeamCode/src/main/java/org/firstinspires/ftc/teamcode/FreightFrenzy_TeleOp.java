@@ -139,6 +139,9 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             // ##############################################################
             //  ######    GAMEPAD2 (B) CONTROLS (arm & TSE turret)    ######
             // TODO: Add controls for the arm
+            //        right_stick_y -> power up and down
+            //        left_stick -> field-centric turnstile turning (225-270 deg either way)
+            //        left_trigger -> turn turnstile so arm is at the front of the robot
 
             if (gamepad2.left_bumper) {
                 robot.TSET_Turnstile.setPosition(robot.TSET_Turnstile.getPosition() - TSET_TURNSTILE_INCREMENT);
@@ -152,9 +155,9 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
                 robot.TSET_Pivot.setPosition(robot.TSET_Pivot.getPosition() + TSET_PIVOT_INCREMENT);
             }
 
-            if (gamepad2.b) {
+            if (gamepad2.a) {
                 robot.TSET_Extender.setPosition(0);
-            } else if (gamepad2.x) {
+            } else if (gamepad2.y) {
                 robot.TSET_Extender.setPosition(1);
             } else {
                 robot.TSET_Extender.setPosition(0.5);
