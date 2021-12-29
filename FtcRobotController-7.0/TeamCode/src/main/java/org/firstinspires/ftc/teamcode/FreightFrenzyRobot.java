@@ -44,8 +44,7 @@ class FreightFrenzyRobot {
     public final int ARM_TURNSTILE_LEFT_MAX_CLICKS = -2000;
     public final int ARM_TURNSTILE_RIGHT_MAX_CLICKS = 2000;
     public final int ARM_HINGE_UP_CLICKS = 1692;
-
-    final double DISPENSER_FLAP_CLOSED_POSITION = 0.44;
+    public final int ARM_HINGE_DOWN_CLICKS = 0;
 
     private LinearOpMode program; // the program using this module.  Robot requires access to the program to know when the program is trying to stop.
 
@@ -130,7 +129,7 @@ class FreightFrenzyRobot {
      * @param millis time limit in milliseconds for this method. If time runs out, the method just ends.
      */
     public void odTurn(double degrees, double speed, int millis) {
-        odTurn(degrees, speed, millis, 0.008);
+        odTurn(degrees, speed, millis, 0.008, true);
     }
     /**
      * Has robot turn at speed power to heading degrees. degrees should be 180 >= degrees >= -180.
@@ -139,8 +138,10 @@ class FreightFrenzyRobot {
      * @param speed motor power the robot is to turn at.
      * @param millis time limit in milliseconds for this method. If time runs out, the method just ends.
      * @param adjustPower basically, how harshly the robot settles into the correct heading. adjustPower of > 0.05 is probably a LOT. Default is 0.008.
+     * @param breakAtEnd If true, the robot sets its drive motors all to zero power;
+     *                   if false, the robot exits the function with the last set drive powers still holding
      */
-    public void odTurn(double degrees, double speed, int millis, double adjustPower) {
+    public void odTurn(double degrees, double speed, int millis, double adjustPower, boolean breakAtEnd) {
         double difference, sign, correct, final_speed, start = (int)System.currentTimeMillis();
 
         this.SetDriveBaseRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -178,10 +179,12 @@ class FreightFrenzyRobot {
                 break;
             }
         }
-        wheel2.setPower(0);
-        wheel4.setPower(0);
-        wheel1.setPower(0);
-        wheel3.setPower(0);
+        if (breakAtEnd) {
+            wheel2.setPower(0);
+            wheel4.setPower(0);
+            wheel1.setPower(0);
+            wheel3.setPower(0);
+        }
     }
 
     /**
@@ -218,7 +221,7 @@ class FreightFrenzyRobot {
      * @param millis Maximum runtime this method is allowed (in milliseconds)
      */
     public void odStrafe(double heading, double speed, double x, double y, double buffer, int millis) {
-        odStrafe(heading, speed, x, y, buffer, millis, 0.02);
+        odStrafe(heading, speed, x, y, buffer, millis, 0.02, true);
     }
     /**
      * Robot travels facing heading going at speed to the point x, y (x and y are in inches).
@@ -231,8 +234,10 @@ class FreightFrenzyRobot {
      * @param millis Maximum runtime this method is allowed (in milliseconds)
      * @param adjustPower How harshly the robot should correct its heading when it veers off
      *                    (0.02 is medium; 0.1 is pretty harsh; 0.004 is very little)
+     * @param breakAtEnd If true, the robot sets its drive motors all to zero power;
+     *                   if false, the robot exits the function with the last set drive powers still holding
      */
-    public void odStrafe(double heading, double speed, double x, double y, double buffer, int millis, double adjustPower) {
+    public void odStrafe(double heading, double speed, double x, double y, double buffer, int millis, double adjustPower, boolean breakAtEnd) {
 
         SetDriveBaseRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -279,11 +284,13 @@ class FreightFrenzyRobot {
                 break;
             }
         }
-        // stop
-        wheel2.setPower(0);
-        wheel4.setPower(0);
-        wheel1.setPower(0);
-        wheel3.setPower(0);
+        if (breakAtEnd) {
+            // stop
+            wheel2.setPower(0);
+            wheel4.setPower(0);
+            wheel1.setPower(0);
+            wheel3.setPower(0);
+        }
     }
 
     public void motorTurnNoReset(double speed, int clicks, DcMotor motor) {
