@@ -10,8 +10,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-import java.util.ArrayList;
-
 /**
  * FTC Robot for the Freight Frenzy season
  *
@@ -73,17 +71,20 @@ class FreightFrenzyRobot {
         TSET_Pivot = hardwareMap.get(Servo.class, "TSET_Pivot");
         TSET_Extender = hardwareMap.get(Servo.class, "TSET_Extender");
 
-        SetDriveBaseZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        setDriveBaseZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         wheel4.setDirection(DcMotorSimple.Direction.REVERSE);
         wheel2.setDirection(DcMotorSimple.Direction.REVERSE);
 
         armTurnstile.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armTurnstile.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armTurnstile.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armHinge.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armHinge.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armHinge.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         duckSpinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         duckSpinner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        duckSpinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         odometer = new Odometer(0, 0, 0);
         odometer.init(imu, wheel1, wheel2);
@@ -92,14 +93,14 @@ class FreightFrenzyRobot {
     }
 
 
-    public void SetDriveBaseRunMode(DcMotor.RunMode runMode) {
+    public void setDriveBaseRunMode(DcMotor.RunMode runMode) {
         wheel1.setMode(runMode);
         wheel2.setMode(runMode);
         wheel3.setMode(runMode);
         wheel4.setMode(runMode);
     }
 
-    public void SetDriveBaseZeroPowerBehavior(DcMotor.ZeroPowerBehavior behavior) {
+    public void setDriveBaseZeroPowerBehavior(DcMotor.ZeroPowerBehavior behavior) {
         wheel1.setZeroPowerBehavior(behavior);
         wheel2.setZeroPowerBehavior(behavior);
         wheel3.setZeroPowerBehavior(behavior);
@@ -108,17 +109,16 @@ class FreightFrenzyRobot {
 
     /**
      * Makes the drivetrain forcefully stop.
-     * After the method is over the drivetrain ZeroPowerBehavior is left on FLOAT
+     * After the method is over the drivetrain ZeroPowerBehavior is left on BRAKE
      * @param ms How long to spend forcing the robot to stop.
      */
-    public void BrakeRobot(int ms) {
-        this.SetDriveBaseZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    public void brakeRobot(int ms) {
+        this.setDriveBaseZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         wheel1.setPower(0);
         wheel2.setPower(0);
         wheel3.setPower(0);
         wheel4.setPower(0);
         odometer.odSleep(ms);
-        this.SetDriveBaseZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 
     /**
@@ -144,7 +144,7 @@ class FreightFrenzyRobot {
     public void odTurn(double degrees, double speed, int millis, double adjustPower, boolean breakAtEnd) {
         double difference, sign, correct, final_speed, start = (int)System.currentTimeMillis();
 
-        this.SetDriveBaseRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        this.setDriveBaseRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         double angle;
         OdometryPosition position = odometer.getCurrentPosition();
@@ -180,6 +180,7 @@ class FreightFrenzyRobot {
             }
         }
         if (breakAtEnd) {
+            setDriveBaseZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             wheel2.setPower(0);
             wheel4.setPower(0);
             wheel1.setPower(0);
@@ -239,7 +240,7 @@ class FreightFrenzyRobot {
      */
     public void odStrafe(double heading, double speed, double x, double y, double buffer, int millis, double adjustPower, boolean breakAtEnd) {
 
-        SetDriveBaseRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        setDriveBaseRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         boolean offTarget = true;
         double start = (int)System.currentTimeMillis();
@@ -250,7 +251,7 @@ class FreightFrenzyRobot {
 
             double xdis = x - position.x;
             double ydis = y - position.y;
-            if (PythagoreanTheorem(xdis, ydis) <= Math.abs(buffer)) {
+            if (pythagoreanTheorem(xdis, ydis) <= Math.abs(buffer)) {
                 offTarget = false;
                 continue;
             }
@@ -285,7 +286,7 @@ class FreightFrenzyRobot {
             }
         }
         if (breakAtEnd) {
-            // stop
+            setDriveBaseZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             wheel2.setPower(0);
             wheel4.setPower(0);
             wheel1.setPower(0);
@@ -311,7 +312,7 @@ class FreightFrenzyRobot {
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    private double PythagoreanTheorem(double a, double b) {
+    private double pythagoreanTheorem(double a, double b) {
         return Math.sqrt(a*a + b*b);
     }
 }

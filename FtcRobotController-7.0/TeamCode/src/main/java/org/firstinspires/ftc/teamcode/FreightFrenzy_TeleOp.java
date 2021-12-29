@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 public class FreightFrenzy_TeleOp extends LinearOpMode {
     public FreightFrenzyRobot robot = new FreightFrenzyRobot();
 
+    // Drivetrain variables
     double adjustAngle = 0;
     double leftStickAngle = 0;
     double theta;  // difference between robot heading and the direction it should travel towards.
@@ -31,15 +32,27 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     final double TSET_TURNSTILE_INCREMENT = 0.002;
     final double TSET_PIVOT_INCREMENT = 0.002;
 
+    double intendedArmTurnstileAngle = adjustAngle;
+    double intendedArmTurnstileClicks = 0;
+
     @Override
     public void runOpMode() {
         robot.init(hardwareMap, this);
         // TODO: Set servo initial positions
+        // odo pods up
+        robot.xOdoPodLift.setPosition(0);
+        robot.yOdoPodLift.setPosition(0);
 
-        //Start robot // TODO: Decide where to start the robot
+        robot.TSET_Turnstile.setPosition(0.8);
+        robot.TSET_Pivot.setPosition(0.5);
+        robot.TSET_Extender.setPosition(0.5);
+
+        // Start robot at starting position (x, y) // TODO: Decide where to start the robot coordinates in teleOp?
         robot.odometer.x = 0;
         robot.odometer.y = 0;
 
+
+        // Set the adjusted robot heading
         if (Math.abs(gamepad2.right_stick_x) + Math.abs(gamepad2.right_stick_y) > 0.2) {
             adjustAngle = Math.atan2(gamepad2.right_stick_x, -gamepad2.right_stick_y) + Math.PI / 2;
         }
@@ -55,8 +68,8 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             position = robot.odometer.getCurrentPosition();
 
 
-            // ################################################################
-            //  ######      CONTROLS TO MAKE THE DRIVE TRAIN MOVE.      ######
+            // ###############################################################
+            //  ######      CONTROLS TO MAKE THE DRIVETRAIN MOVE.      ######
             robot.angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             // now use right stick input to get the robot's heading. the if statement ensures that the joystick is a distance away from the center where readings will be accurate.
             if (Math.abs(gamepad1.right_stick_x) + Math.abs(gamepad1.right_stick_y) > 0.6) {
@@ -141,7 +154,13 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             // TODO: Add controls for the arm
             //        right_stick_y -> power up and down
             //        left_stick -> field-centric turnstile turning (225-270 deg either way)
-            //        left_trigger -> turn turnstile so arm is at the front of the robot
+            //        left_trigger || right_trigger -> turn turnstile so arm is at the front of the robot
+            robot.armHinge.setPower(gamepad2.right_stick_y);
+
+            // 1- if g2.left_stick, set intended angle and from that and the robot's position derive intended clicks
+            // 2- if g2.left_trigger or g2.right_trigger, set intended clicks to 0.
+            // 3- turn arm to intended clicks (make sure that it turns the shortest way unless it would exceed ~250 degrees of rotation away from tthe initial position)
+
 
             if (gamepad2.left_bumper) {
                 robot.TSET_Turnstile.setPosition(robot.TSET_Turnstile.getPosition() - TSET_TURNSTILE_INCREMENT);
