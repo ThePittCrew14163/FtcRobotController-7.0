@@ -13,6 +13,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
 
     // Drivetrain variables
     double adjustAngle = 0;
+    double robotAngle = adjustAngle;
     double leftStickAngle = 0;
     double theta;  // difference between robot heading and the direction it should travel towards.
     double leftStickR = 0; // distance from 0-1 from gamepad1.left_stick center to edge. is used to set power level to drive train motors.
@@ -21,6 +22,8 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     double speed;  // speed adjustment for robot to turn towards robotAngle.
     double difference;
     double sign;
+
+    final double DRIVETRAIN_ADJUST_POWER = 1/80;
 
     /**
      * delay in milliseconds
@@ -33,7 +36,8 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     final double TSET_PIVOT_INCREMENT = 0.002;
 
     double intendedArmTurnstileAngle = adjustAngle;
-    double intendedArmTurnstileClicks = 0;
+    int intendedArmTurnstileClicks = 0;
+    double armTurnstileAdjustPower = 0.1;
 
     @Override
     public void runOpMode() {
@@ -54,9 +58,10 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
 
         // Set the adjusted robot heading
         if (Math.abs(gamepad2.right_stick_x) + Math.abs(gamepad2.right_stick_y) > 0.2) {
-            adjustAngle = Math.atan2(gamepad2.right_stick_x, -gamepad2.right_stick_y) + Math.PI / 2;
+            adjustAngle = Math.atan2(-gamepad2.right_stick_y, gamepad2.right_stick_x) - Math.PI / 2;
         }
-        adjustAngle = -(adjustAngle * 180) / Math.PI;
+        adjustAngle = adjustAngle * 180 / Math.PI;
+        robotAngle = adjustAngle;
 
         // Wait for the game to start
 
@@ -73,27 +78,27 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             robot.angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             // now use right stick input to get the robot's heading. the if statement ensures that the joystick is a distance away from the center where readings will be accurate.
             if (Math.abs(gamepad1.right_stick_x) + Math.abs(gamepad1.right_stick_y) > 0.6) {
-                adjustAngle = (-Math.atan2(gamepad1.right_stick_x, -gamepad1.right_stick_y) * 180 / Math.PI) - 90;
-                if (adjustAngle <= -180) {
-                    adjustAngle += 360;
+                robotAngle = (Math.atan2(-gamepad1.right_stick_y, gamepad1.right_stick_x) * 180 / Math.PI) - 90;
+                if (robotAngle <= -180) {
+                    robotAngle += 360;
                 }
-                if (adjustAngle >= 180) {
-                    adjustAngle -= 360;
+                if (robotAngle >= 180) {
+                    robotAngle -= 360;
                 }
             }
             if (gamepad1.left_stick_x != 0 || gamepad1.left_stick_y != 0) {
-                leftStickAngle = -Math.atan2(gamepad1.left_stick_x, -gamepad1.left_stick_y) + (Math.PI * 5 / 4);
+                leftStickAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) + (Math.PI * 3 / 4); // TODO: test and make sure the robot goes in the correct direction.
                 if (leftStickAngle >= Math.PI) {
                     leftStickAngle -= Math.PI * 2;
                 }
-                theta = adjustAngle / 180 * Math.PI - leftStickAngle;
+                theta = (robotAngle / 180) * Math.PI - leftStickAngle;
                 xWheelsPower = Math.cos(theta);
                 yWheelsPower = Math.sin(theta);
             } else {
                 xWheelsPower = 0;
                 yWheelsPower = 0;
             }
-            difference = robot.angles.firstAngle - adjustAngle - (this.adjustAngle * 180) / Math.PI;
+            difference = (robot.angles.firstAngle - robotAngle) + adjustAngle;
             if (Math.abs(difference) > 180) {
                 if (difference < 0) {
                     sign = -1;
@@ -101,9 +106,9 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
                     sign = 1;
                 }
                 difference = sign * (360 - Math.abs(difference));
-                speed = -(difference) / 80;
+                speed = -(difference) * DRIVETRAIN_ADJUST_POWER;
             } else {
-                speed = (difference) / 80;
+                speed = (difference) * DRIVETRAIN_ADJUST_POWER;
             }
 
             leftStickR = Math.sqrt((Math.pow(gamepad1.left_stick_x, 2) + Math.pow(gamepad1.left_stick_y, 2))) * 1.42;
@@ -111,11 +116,11 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             // this code here ensures that the robot can turn without having to strafe or sit there making a whining noise.
             double speed1 = speed, speed2 = speed; // speed1 is for the front wheels 1 and 2, and speed2 is for the back wheels 3 and 4.
 
-            if (0.1 <= Math.abs(speed) && Math.abs(speed) < 0.2) {
+            if (robot.MIN_DRIVE_BASE_TURN_POWER/2 <= Math.abs(speed) && Math.abs(speed) < robot.MIN_DRIVE_BASE_TURN_POWER) {
                 // only the back wheels move, meaning that the robot can turn but at a lower speed.
                 speed2 *= 2;
                 speed1 = 0;
-            } else if (Math.abs(speed) < 0.1) {
+            } else if (Math.abs(speed) < robot.MIN_DRIVE_BASE_TURN_POWER/2) {
                 // at a certain threshold you'll get no movement, but the motors will whine. thus, it's best to just stop them.
                 speed1 = 0;
                 speed2 = 0;
@@ -151,17 +156,26 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
 
             // ##############################################################
             //  ######    GAMEPAD2 (B) CONTROLS (arm & TSE turret)    ######
+
             // TODO: Add controls for the arm
             //        right_stick_y -> power up and down
-            //        left_stick -> field-centric turnstile turning (225-270 deg either way)
+            //        left_stick -> field-centric turnstile turning (270 deg either way)
             //        left_trigger || right_trigger -> turn turnstile so arm is at the front of the robot
             robot.armHinge.setPower(gamepad2.right_stick_y);
 
             // 1- if g2.left_stick, set intended angle and from that and the robot's position derive intended clicks
+
             // 2- if g2.left_trigger or g2.right_trigger, set intended clicks to 0.
-            // 3- turn arm to intended clicks (make sure that it turns the shortest way unless it would exceed ~250 degrees of rotation away from tthe initial position)
+            if (gamepad2.left_trigger > 0.2 || gamepad2.right_trigger > 0.2) {
+                intendedArmTurnstileClicks = 0;
+            }
+            // 3- turn arm to intended clicks (make sure that it turns the shortest way unless it would exceed 270 degrees of rotation away from tthe initial position)
+            // TODO: Stop arm turnstile if arm hinge is lowered?
+            robot.motorTurnNoReset(Math.abs(robot.armTurnstile.getCurrentPosition() - intendedArmTurnstileClicks) * armTurnstileAdjustPower,
+                                    intendedArmTurnstileClicks, robot.armTurnstile);
 
 
+            // Team Shipping Element Turret controls
             if (gamepad2.left_bumper) {
                 robot.TSET_Turnstile.setPosition(robot.TSET_Turnstile.getPosition() - TSET_TURNSTILE_INCREMENT);
             } else if (gamepad2.right_bumper) {

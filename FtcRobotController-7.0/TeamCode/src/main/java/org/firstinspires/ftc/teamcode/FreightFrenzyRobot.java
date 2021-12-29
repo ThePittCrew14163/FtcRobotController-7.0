@@ -27,6 +27,7 @@ class FreightFrenzyRobot {
     public DcMotorEx duckSpinner;
     public Servo xOdoPodLift;
     public Servo yOdoPodLift;
+    // TSET = Team Shipping Element Turret
     public Servo TSET_Turnstile;
     public Servo TSET_Pivot;
     /**
@@ -39,9 +40,13 @@ class FreightFrenzyRobot {
 
     public final double MIN_DRIVE_BASE_TURN_POWER = 0.18;
 
-    public final int ARM_TURNSTILE_LEFT_MAX_CLICKS = -2000;
-    public final int ARM_TURNSTILE_RIGHT_MAX_CLICKS = 2000;
-    public final int ARM_HINGE_UP_CLICKS = 1692;
+    public final int ARM_TURNSTILE_LEFT_MAX_CLICKS = -2625; // full rotation is 3500 clicks, and this limits it to 270 deg rotation either way
+    public final int ARM_TURNSTILE_RIGHT_MAX_CLICKS = 2625;
+    public final double ARM_TURNSTILE_DEG_PER_CLICK = 360.0 / 3500;
+    /**
+     * When it is turned 90 degrees up. It is capable of turning much farther, likely past 3000 clicks.
+     */
+    public final int ARM_HINGE_UP_CLICKS = 1792;
     public final int ARM_HINGE_DOWN_CLICKS = 0;
 
     private LinearOpMode program; // the program using this module.  Robot requires access to the program to know when the program is trying to stop.
@@ -255,9 +260,9 @@ class FreightFrenzyRobot {
                 offTarget = false;
                 continue;
             }
-            double radians = Math.atan2(-xdis, ydis);  // the direction the robot is supposed to go towards
+            double radians = Math.atan2(ydis, xdis);  // the direction the robot is supposed to go towards
 
-            double theta = ((heading/180)*Math.PI) - radians + Math.PI/4;
+            double theta = ((heading/180)*Math.PI) + radians + Math.PI*3/4; // TODO: test and make sure the robot goes in the correct direction.
             if (theta >= Math.PI) {
                 theta -= Math.PI*2;
             } else if (theta < -Math.PI) {
