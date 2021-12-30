@@ -36,8 +36,11 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     final double TSET_PIVOT_INCREMENT = 0.002;
 
     double intendedArmTurnstileAngle = adjustAngle;
+    double diff;
+    double armTurnstileAngle = 0;
     int intendedArmTurnstileClicks = 0;
-    double armTurnstileAdjustPower = 0.1;
+    int lastIntendedArmTurnstileClicks = intendedArmTurnstileClicks;
+    double armTurnstileAdjustPower = 0.003;
 
     @Override
     public void runOpMode() {
@@ -72,7 +75,6 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
         while (opModeIsActive()) {
             position = robot.odometer.getCurrentPosition();
 
-
             // ###############################################################
             //  ######      CONTROLS TO MAKE THE DRIVETRAIN MOVE.      ######
             robot.angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -98,7 +100,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
                 xWheelsPower = 0;
                 yWheelsPower = 0;
             }
-            difference = (robot.angles.firstAngle - robotAngle) + adjustAngle;
+            difference = (position.angle - robotAngle) + adjustAngle;
             if (Math.abs(difference) > 180) {
                 if (difference < 0) {
                     sign = -1;
@@ -157,22 +159,42 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             // ##############################################################
             //  ######    GAMEPAD2 (B) CONTROLS (arm & TSE turret)    ######
 
-            // TODO: Add controls for the arm
-            //        right_stick_y -> power up and down
-            //        left_stick -> field-centric turnstile turning (270 deg either way)
+            // Controls for the arm
+            //        left_stick_y -> power up and down
+            //        right_stick -> field-centric turnstile turning (270 deg either way)
             //        left_trigger || right_trigger -> turn turnstile so arm is at the front of the robot
-            robot.armHinge.setPower(gamepad2.right_stick_y);
+            robot.armHinge.setPower(gamepad2.left_stick_y);
 
+            lastIntendedArmTurnstileClicks = intendedArmTurnstileClicks;
             // 1- if g2.left_stick, set intended angle and from that and the robot's position derive intended clicks
+            if (Math.abs(gamepad2.right_stick_x) + Math.abs(gamepad2.right_stick_y) > 0.6) {
+                // get field-centric angle from joystick
+                intendedArmTurnstileAngle = (Math.atan2(-gamepad2.right_stick_y, gamepad2.right_stick_x) - Math.PI / 2) * 180 / Math.PI;
+                armTurnstileAngle = robot.armTurnstile.getCurrentPosition() / robot.ARM_TURNSTILE_CLICKS_PER_DEG;
 
+                // convert that angle to a robot-relative angle
+                intendedArmTurnstileAngle = (intendedArmTurnstileAngle - position.angle + 720) % 360;
+                if (intendedArmTurnstileAngle > 180) { intendedArmTurnstileAngle -= 360; }
+
+                diff = intendedArmTurnstileAngle - armTurnstileAngle;
+                if (diff > 180 && intendedArmTurnstileAngle + 360 < robot.ARM_TURNSTILE_MAX_DEG) {
+                    intendedArmTurnstileAngle += 360;
+                } else if (diff < -180 && intendedArmTurnstileAngle - 360 > -robot.ARM_TURNSTILE_MAX_DEG) {
+                    intendedArmTurnstileAngle -= 360;
+                }
+
+                intendedArmTurnstileClicks = (int)(intendedArmTurnstileAngle * robot.ARM_TURNSTILE_CLICKS_PER_DEG);
+            }
             // 2- if g2.left_trigger or g2.right_trigger, set intended clicks to 0.
             if (gamepad2.left_trigger > 0.2 || gamepad2.right_trigger > 0.2) {
                 intendedArmTurnstileClicks = 0;
             }
-            // 3- turn arm to intended clicks (make sure that it turns the shortest way unless it would exceed 270 degrees of rotation away from tthe initial position)
+            // 3- turn arm to intended clicks if the desired position has changed.
             // TODO: Stop arm turnstile if arm hinge is lowered?
-            robot.motorTurnNoReset(Math.abs(robot.armTurnstile.getCurrentPosition() - intendedArmTurnstileClicks) * armTurnstileAdjustPower,
-                                    intendedArmTurnstileClicks, robot.armTurnstile);
+            if (lastIntendedArmTurnstileClicks != intendedArmTurnstileClicks) {
+                robot.motorTurnNoReset(Math.abs(robot.armTurnstile.getCurrentPosition() - intendedArmTurnstileClicks) * armTurnstileAdjustPower,
+                        intendedArmTurnstileClicks, robot.armTurnstile);
+            }
 
 
             // Team Shipping Element Turret controls

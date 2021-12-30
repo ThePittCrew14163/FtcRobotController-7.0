@@ -42,7 +42,8 @@ class FreightFrenzyRobot {
 
     public final int ARM_TURNSTILE_LEFT_MAX_CLICKS = -2625; // full rotation is 3500 clicks, and this limits it to 270 deg rotation either way
     public final int ARM_TURNSTILE_RIGHT_MAX_CLICKS = 2625;
-    public final double ARM_TURNSTILE_DEG_PER_CLICK = 360.0 / 3500;
+    public final double ARM_TURNSTILE_CLICKS_PER_DEG = 3500 / 360.0;
+    public final double ARM_TURNSTILE_MAX_DEG = 270;
     /**
      * When it is turned 90 degrees up. It is capable of turning much farther, likely past 3000 clicks.
      */
