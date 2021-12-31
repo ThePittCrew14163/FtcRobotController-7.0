@@ -106,18 +106,18 @@ public class RingFinderPipeline extends OpenCvPipeline {
     }
     public double[] getRingPath(int position, FreightFrenzyRobot robot, double distance, double phoneXOffset, double phoneYOffset){
         double phoneX, phoneY, finalX, finalY, positionAngle;
-        // commented out because this robot has no odometer
-//        ArrayList<Double> currentCoordinates = robot.odometer.getCurrentCoordinates();
-//
-//        phoneX = robot.odometer.x + phoneXOffset;
-//        phoneY = robot.odometer.y + phoneYOffset;
-//
-//        positionAngle = robot.odometer.angle - (position * this.cameraDegreeRange/numBoxes) + this.cameraDegreeRange/2 - this.cameraDegreeOffset;
-//
-//        finalX = phoneX + Math.cos(Math.toRadians(90+positionAngle))*distance;
-//        finalY = phoneY + Math.sin(Math.toRadians(90+positionAngle))*distance;
 
-        double[] output = {};// = {positionAngle, finalX, finalY};
+        robot.odometer.getCurrentPosition();
+
+        phoneX = robot.odometer.x + phoneXOffset;
+        phoneY = robot.odometer.y + phoneYOffset;
+
+        positionAngle = robot.odometer.angle - (position * this.cameraDegreeRange/numBoxes) + this.cameraDegreeRange/2 - this.cameraDegreeOffset;
+
+        finalX = phoneX + Math.cos(Math.toRadians(90+positionAngle))*distance;
+        finalY = phoneY + Math.sin(Math.toRadians(90+positionAngle))*distance;
+
+        double[] output = {positionAngle, finalX, finalY};
         return output;
     }
 }
