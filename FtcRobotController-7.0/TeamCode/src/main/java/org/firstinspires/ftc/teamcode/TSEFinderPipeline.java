@@ -9,7 +9,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 public class TSEFinderPipeline extends OpenCvPipeline {
     private Mat workingMatrix = new Mat();
-    public TSE_Position position = TSE_Position.CENTER;
+    public TSE_Position tse_position = TSE_Position.CENTER;
     private int leftBoxX = 70;
     private int centerBoxX = 230;
     private int rightBoxX = 370;
@@ -17,7 +17,7 @@ public class TSEFinderPipeline extends OpenCvPipeline {
     private int boxHeight = 70;
     private int boxY = 330;
 
-    private double leftTotal, centerTotal, rightTotal;
+    public double leftTotal, centerTotal, rightTotal;
 
     public TSEFinderPipeline() {
     }
@@ -48,18 +48,18 @@ public class TSEFinderPipeline extends OpenCvPipeline {
         if (leftTotal > centerTotal) {
             if (leftTotal > rightTotal) {
                 // team shipping element is to the left
-                position = TSE_Position.LEFT;
+                tse_position = TSE_Position.LEFT;
             } else {
                 // team shipping element is to the right
-                position = TSE_Position.RIGHT;
+                tse_position = TSE_Position.RIGHT;
             }
         } else {
             if (centerTotal > rightTotal) {
                 // team shipping element is in the center
-                position = TSE_Position.CENTER;
+                tse_position = TSE_Position.CENTER;
             } else {
                 // team shipping element is to the right
-                position = TSE_Position.RIGHT;
+                tse_position = TSE_Position.RIGHT;
             }
         }
 
