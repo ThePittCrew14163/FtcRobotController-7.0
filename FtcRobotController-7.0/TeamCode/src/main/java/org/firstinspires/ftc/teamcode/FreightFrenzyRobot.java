@@ -50,6 +50,11 @@ class FreightFrenzyRobot {
     public final int ARM_HINGE_UP_CLICKS = 1792;
     public final int ARM_HINGE_DOWN_CLICKS = 0;
 
+    public final double X_ODO_POD_DOWN_POSITION = 1.0; // TODO: actually put in the correct positions if these are wrong
+    public final double X_ODO_POD_UP_POSITION = 0.0;
+    public final double Y_ODO_POD_DOWN_POSITION = 0.0;
+    public final double Y_ODO_POD_UP_POSITION = 1.0;
+
     private LinearOpMode program; // the program using this module.  Robot requires access to the program to know when the program is trying to stop.
 
     public void init(HardwareMap hardwareMap, LinearOpMode program) {
@@ -111,6 +116,16 @@ class FreightFrenzyRobot {
         wheel2.setZeroPowerBehavior(behavior);
         wheel3.setZeroPowerBehavior(behavior);
         wheel4.setZeroPowerBehavior(behavior);
+    }
+
+    public void setOdoPodsDown() {
+        xOdoPodLift.setPosition(X_ODO_POD_DOWN_POSITION);
+        yOdoPodLift.setPosition(Y_ODO_POD_DOWN_POSITION);
+    }
+
+    public void setOdoPodsUp() {
+        xOdoPodLift.setPosition(X_ODO_POD_UP_POSITION);
+        yOdoPodLift.setPosition(Y_ODO_POD_UP_POSITION);
     }
 
     /**

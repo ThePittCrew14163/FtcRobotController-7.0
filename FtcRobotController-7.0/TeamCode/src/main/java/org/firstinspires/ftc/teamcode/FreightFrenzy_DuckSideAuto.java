@@ -62,7 +62,13 @@ public class FreightFrenzy_DuckSideAuto extends LinearOpMode {
 
         robot.odometer.x = 9*s;
         robot.odometer.y = 96;
-        // TODO: set servo initial positions
+
+        // Set servo initial positions
+        robot.setOdoPodsDown();
+        robot.TSET_Turnstile.setPosition(0.85);
+        robot.TSET_Pivot.setPosition(0.12);
+        robot.TSET_Extender.setPosition(0.5);
+
 
         while (!isStarted() && !isStopRequested()) {
             tse_position = pipeline.tse_position;
@@ -76,6 +82,15 @@ public class FreightFrenzy_DuckSideAuto extends LinearOpMode {
             robot.odometer.odSleep(50);
         }
 
+        // score pre-loaded freight
+
+        // spin carousel
+
+        // pick up duck TODO: make duck-finding vision software
+
+        // score duck
+
+        // park
 
     }
 }
