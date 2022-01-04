@@ -20,6 +20,7 @@ public class TSEFinderPipeline extends OpenCvPipeline {
     public double leftTotal, centerTotal, rightTotal;
 
     public TSEFinderPipeline() {
+        // TODO: Do something in this constructor?
     }
 
     @Override
