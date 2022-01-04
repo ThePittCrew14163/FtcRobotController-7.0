@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -8,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 /**
@@ -34,6 +36,11 @@ class FreightFrenzyRobot {
      * A continuously rotating servo that extends and retracts the tape measure that scores the Team Shipping Element.
      */
     public Servo TSET_Extender;
+    /**
+     * detects if anything is in the intake hand
+     */
+    public Rev2mDistanceSensor distanceSensor;
+
     public Orientation angles; // used to get info from BNO055IMU
 
     public Odometer odometer;
@@ -54,6 +61,12 @@ class FreightFrenzyRobot {
     public final double X_ODO_POD_UP_POSITION = 0.0;
     public final double Y_ODO_POD_DOWN_POSITION = 0.0;
     public final double Y_ODO_POD_UP_POSITION = 1.0;
+
+    /**
+     * How many cm (give or take ~1cm) this.distanceSensor normally
+     * detects from it to the bottom of the intake hand.
+     */
+    public final double CM_FOR_NO_FREIGHT = 9.0;
 
     private LinearOpMode program; // the program using this module.  Robot requires access to the program to know when the program is trying to stop.
 
@@ -82,6 +95,8 @@ class FreightFrenzyRobot {
         TSET_Pivot = hardwareMap.get(Servo.class, "TSET_Pivot");
         TSET_Extender = hardwareMap.get(Servo.class, "TSET_Extender");
 
+        distanceSensor = hardwareMap.get(Rev2mDistanceSensor.class, "distanceSensor"); // TODO: actually configure this sensor
+
         setDriveBaseZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         wheel4.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -99,6 +114,8 @@ class FreightFrenzyRobot {
 
         odometer = new Odometer(0, 0, 0);
         odometer.init(imu, wheel1, wheel2);
+
+        distanceSensor.initialize(); // TODO: Learn if and when initialization is necessary
 
         this.program = program;
     }

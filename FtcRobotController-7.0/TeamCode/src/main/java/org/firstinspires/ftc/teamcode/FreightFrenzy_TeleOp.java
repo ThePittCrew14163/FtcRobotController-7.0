@@ -45,19 +45,10 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot.init(hardwareMap, this);
-        // TODO: Set servo initial positions
-        // odo pods up
-        robot.xOdoPodLift.setPosition(0);
-        robot.yOdoPodLift.setPosition(0);
-
-        robot.TSET_Turnstile.setPosition(0.8);
-        robot.TSET_Pivot.setPosition(0.5);
-        robot.TSET_Extender.setPosition(0.5);
 
         // Start robot at starting position (x, y) // TODO: Decide where to start the robot coordinates in teleOp?
         robot.odometer.x = 0;
         robot.odometer.y = 0;
-
 
         // Set the adjusted robot heading
         if (Math.abs(gamepad2.right_stick_x) + Math.abs(gamepad2.right_stick_y) > 0.2) {
@@ -66,9 +57,17 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
         adjustAngle = adjustAngle * 180 / Math.PI;
         robotAngle = adjustAngle;
 
-        // Wait for the game to start
+        telemetry.addData("adjusted robot heading", adjustAngle);
+        telemetry.update();
 
+        // Wait for the game to start
         waitForStart();
+
+        // Set servo initial positions
+        robot.setOdoPodsUp();
+        robot.TSET_Turnstile.setPosition(0.8);
+        robot.TSET_Pivot.setPosition(0.5);
+        robot.TSET_Extender.setPosition(0.5);
 
         // run until the end of the match (driver presses STOP)
         OdometryPosition position;
