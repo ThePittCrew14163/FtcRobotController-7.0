@@ -59,8 +59,8 @@ class FreightFrenzyRobot {
 
     public final double X_ODO_POD_DOWN_POSITION = 1.0; // TODO: actually put in the correct positions if these are wrong
     public final double X_ODO_POD_UP_POSITION = 0.0;
-    public final double Y_ODO_POD_DOWN_POSITION = 0.0;
-    public final double Y_ODO_POD_UP_POSITION = 1.0;
+    public final double Y_ODO_POD_DOWN_POSITION = 1.0;
+    public final double Y_ODO_POD_UP_POSITION = 0.0;
 
     /**
      * How many cm (give or take ~1cm) this.distanceSensor normally

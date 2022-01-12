@@ -15,7 +15,7 @@ public class RingFinderPipeline extends OpenCvPipeline {
     public int[] positions = {0, 0}; // up to two rings to get from a position
 
     private int numBoxes = 14;
-    public double[] threshholds = new double[numBoxes]; // the threshholds for each box
+    public double[] thresholds = new double[numBoxes]; // the thresholds for each box
 
     private int boxWidth = 34;
     private int boxHeight = 130;
@@ -25,7 +25,7 @@ public class RingFinderPipeline extends OpenCvPipeline {
     private int endY = 435;
     private int incrementY = (endY-startY)/numBoxes;
 
-    private double isRingThreshhold = 149;
+    private double isRingThreshold = 149;
     public String s = "nothing so far";
 
     public double cameraDegreeRange = 43;
@@ -65,11 +65,11 @@ public class RingFinderPipeline extends OpenCvPipeline {
 
         // Loop through every box where the robot looks for rings and find the places where there are most likely rings
         // The value we're looking at is lowest in the presence of rings
-        // Old way: boxValue = Core.sumElems(box).val[2]/boxArea; private double isRingThreshhold = 105;
+        // Old way: boxValue = Core.sumElems(box).val[2]/boxArea; private double isRingThreshold = 105;
         for (Mat box : this.boxes) {
             boxValue = Core.sumElems(box).val[1]/boxArea; // should look for redishness
-            threshholds[count] = boxValue;
-            if (boxValue > isRingThreshhold){
+            thresholds[count] = boxValue;
+            if (boxValue > isRingThreshold){
                 if (boxValue > bestPositionValue){
                     // If the best position has been surpassed, what used to be best is now second best
                     secondBestPositionValue = bestPositionValue;
