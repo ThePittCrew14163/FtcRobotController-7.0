@@ -68,6 +68,12 @@ class FreightFrenzyRobot {
      */
     public final double CM_FOR_NO_FREIGHT = 9.0;
 
+    public final int DUCK_SPINNER_VELOCITY = 50;
+
+    public final double INTAKE_ON_POWER = 1;
+    public final double INTAKE_OUTPUT_POWER = -0.45;
+    public final double INTAKE_SHOOT_POWER = -0.8;
+
     private LinearOpMode program; // the program using this module.  Robot requires access to the program to know when the program is trying to stop.
 
     public void init(HardwareMap hardwareMap, LinearOpMode program) {

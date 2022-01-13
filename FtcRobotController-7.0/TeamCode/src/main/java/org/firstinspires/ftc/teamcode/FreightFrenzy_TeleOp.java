@@ -140,17 +140,17 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
                 this.last_intake_switch = (int) System.currentTimeMillis();
             }
             if (gamepad1.right_bumper) {
-                robot.intake.setPower(-1);
+                robot.intake.setPower(robot.INTAKE_OUTPUT_POWER);
             } else if (!run_intake) {
                 robot.intake.setPower(0);
             } else {
-                robot.intake.setPower(1);
+                robot.intake.setPower(robot.INTAKE_ON_POWER);
             }
 
             if (gamepad1.dpad_left) {
-                robot.duckSpinner.setVelocity(-50);
+                robot.duckSpinner.setVelocity(-robot.DUCK_SPINNER_VELOCITY);
             } else if (gamepad1.dpad_right) {
-                robot.duckSpinner.setVelocity(50);
+                robot.duckSpinner.setVelocity(robot.DUCK_SPINNER_VELOCITY);
             } else {
                 robot.duckSpinner.setVelocity(0);
             }

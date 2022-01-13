@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 public enum TSE_Position {
-   LEFT,
-   CENTER,
-   RIGHT
+   LEFT,   // bottom tray
+   CENTER, // middle tray
+   RIGHT   // top tray
 }
