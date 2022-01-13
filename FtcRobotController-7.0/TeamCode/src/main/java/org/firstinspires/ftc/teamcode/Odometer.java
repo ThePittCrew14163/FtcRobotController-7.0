@@ -47,6 +47,9 @@ public class Odometer {
     public double last_x_clicks = 0;
     public double last_y_clicks = 0;
 
+    public boolean READ_X_REVERSE = false;
+    public boolean READ_Y_REVERSE = false;
+
     public void init(BNO055IMU imu, DcMotor y_encoder, DcMotor x_encoder) {
         this.imu = imu;
         this.y_encoder = y_encoder;
@@ -69,11 +72,15 @@ public class Odometer {
 
         // get distance travelled by each wheel since last check and then save current clicks for each wheel.
         double yc = this.y_encoder.getCurrentPosition();
+        if (READ_Y_REVERSE) { yc = -yc;}
         double hy = (this.last_y_clicks - yc) / this.CLICKS_PER_INCH;
         this.last_y_clicks = yc;
+
         double xc = this.x_encoder.getCurrentPosition(); // xc = x wheel clicks
+        if (READ_X_REVERSE) { xc = -xc;}
         double hx = (this.last_x_clicks - xc) / this.CLICKS_PER_INCH;  // hx = distance traveled in the last frame by the x wheel
         this.last_x_clicks = xc;
+
 
         // get new angle
         Orientation imuOrientation = this.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);

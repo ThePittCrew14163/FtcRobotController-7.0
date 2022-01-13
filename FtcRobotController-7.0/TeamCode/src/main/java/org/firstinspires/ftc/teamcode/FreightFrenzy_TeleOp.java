@@ -23,7 +23,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     double difference;
     double sign;
 
-    final double DRIVETRAIN_ADJUST_POWER = 1/80;
+    final double DRIVETRAIN_ADJUST_POWER = 0.012;
 
     /**
      * delay in milliseconds
@@ -32,15 +32,15 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     int last_intake_switch = (int)System.currentTimeMillis();
     public boolean run_intake = false;
 
-    final double TSET_TURNSTILE_INCREMENT = 0.002;
-    final double TSET_PIVOT_INCREMENT = 0.002;
+    final double TSET_TURNSTILE_INCREMENT = 0.004;
+    final double TSET_PIVOT_INCREMENT = 0.015;
 
     double intendedArmTurnstileAngle = adjustAngle;
     double diff;
     double armTurnstileAngle = 0;
     int intendedArmTurnstileClicks = 0;
     int lastIntendedArmTurnstileClicks = intendedArmTurnstileClicks;
-    double armTurnstileAdjustPower = 0.003;
+    double armTurnstileAdjustPower = 0.01;
 
     @Override
     public void runOpMode() {
@@ -64,9 +64,9 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
         waitForStart();
 
         // Set servo initial positions
-        robot.setOdoPodsUp();
-        robot.TSET_Turnstile.setPosition(0.8);
-        robot.TSET_Pivot.setPosition(0.5);
+        robot.setOdoPodsDown();
+        robot.TSET_Turnstile.setPosition(0.85);
+        robot.TSET_Pivot.setPosition(0.4);
         robot.TSET_Extender.setPosition(0.5);
 
         // run until the end of the match (driver presses STOP)
@@ -88,7 +88,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
                 }
             }
             if (gamepad1.left_stick_x != 0 || gamepad1.left_stick_y != 0) {
-                leftStickAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) + (Math.PI * 3 / 4); // TODO: test and make sure the robot goes in the correct direction.
+                leftStickAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) + (Math.PI * 1 / 4); // TODO: test and make sure the robot goes in the correct direction.
                 if (leftStickAngle >= Math.PI) {
                     leftStickAngle -= Math.PI * 2;
                 }
@@ -194,6 +194,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
                 robot.motorTurnNoReset(Math.abs(robot.armTurnstile.getCurrentPosition() - intendedArmTurnstileClicks) * armTurnstileAdjustPower,
                         intendedArmTurnstileClicks, robot.armTurnstile);
             }
+            telemetry.addData("intended clicks for arm", intendedArmTurnstileClicks);
 
 
             // Team Shipping Element Turret controls
@@ -203,9 +204,9 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
                 robot.TSET_Turnstile.setPosition(robot.TSET_Turnstile.getPosition() + TSET_TURNSTILE_INCREMENT);
             }
 
-            if (gamepad2.dpad_left) {
+            if (gamepad2.dpad_down) {
                 robot.TSET_Pivot.setPosition(robot.TSET_Pivot.getPosition() - TSET_PIVOT_INCREMENT);
-            } else if (gamepad2.dpad_right) {
+            } else if (gamepad2.dpad_up) {
                 robot.TSET_Pivot.setPosition(robot.TSET_Pivot.getPosition() + TSET_PIVOT_INCREMENT);
             }
 

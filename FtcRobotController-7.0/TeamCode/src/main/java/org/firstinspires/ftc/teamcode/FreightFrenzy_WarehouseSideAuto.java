@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name = "Warehouse side (Red or Blue)")
-class FreightFrenzy_WarehouseSideAuto extends FreightFrenzy_BaseAutoSetup {
+public class FreightFrenzy_WarehouseSideAuto extends FreightFrenzy_BaseAutoSetup {
 
     @Override
     public void initOdometryCoordinates() {

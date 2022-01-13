@@ -60,7 +60,7 @@ class FreightFrenzyRobot {
     public final double X_ODO_POD_DOWN_POSITION = 1.0; // TODO: actually put in the correct positions if these are wrong
     public final double X_ODO_POD_UP_POSITION = 0.0;
     public final double Y_ODO_POD_DOWN_POSITION = 1.0;
-    public final double Y_ODO_POD_UP_POSITION = 0.0;
+    public final double Y_ODO_POD_UP_POSITION = 0.4;
 
     /**
      * How many cm (give or take ~1cm) this.distanceSensor normally
@@ -68,7 +68,7 @@ class FreightFrenzyRobot {
      */
     public final double CM_FOR_NO_FREIGHT = 9.0;
 
-    public final int DUCK_SPINNER_VELOCITY = 50;
+    public final int DUCK_SPINNER_VELOCITY = 400;
 
     public final double INTAKE_ON_POWER = 1;
     public final double INTAKE_OUTPUT_POWER = -0.45;
@@ -120,6 +120,8 @@ class FreightFrenzyRobot {
 
         odometer = new Odometer(0, 0, 0);
         odometer.init(imu, wheel1, wheel2);
+        odometer.READ_Y_REVERSE = true;
+        odometer.READ_X_REVERSE = true;
 
         distanceSensor.initialize(); // TODO: Learn if and when initialization is necessary
 

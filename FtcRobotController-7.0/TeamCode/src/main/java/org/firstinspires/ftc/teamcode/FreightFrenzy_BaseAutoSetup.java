@@ -10,7 +10,7 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 /**
  * odometry (x,y) is (0,0) for the back corner of the robot's alliance's warehouse.
  */
-class FreightFrenzy_BaseAutoSetup extends LinearOpMode {
+public class FreightFrenzy_BaseAutoSetup extends LinearOpMode {
     public FreightFrenzyRobot robot = new FreightFrenzyRobot();
     Alliance side = Alliance.Red;
     /**
@@ -69,7 +69,7 @@ class FreightFrenzy_BaseAutoSetup extends LinearOpMode {
         // Set servo initial positions
         robot.setOdoPodsDown();
         robot.TSET_Turnstile.setPosition(0.85);
-        robot.TSET_Pivot.setPosition(0.12);
+        robot.TSET_Pivot.setPosition(0.4);
         robot.TSET_Extender.setPosition(0.5);
 
 
