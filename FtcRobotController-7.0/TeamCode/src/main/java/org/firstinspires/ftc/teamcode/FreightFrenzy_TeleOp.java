@@ -35,14 +35,10 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     public boolean run_intake = false;
 
     final double TSET_TURNSTILE_INCREMENT = 0.006;
-    final double TSET_PIVOT_INCREMENT = 0.007;
+    final double TSET_PIVOT_INCREMENT = 0.018;
 
-    double intendedArmTurnstileAngle = adjustAngle;
-    double diff;
-    double armTurnstileAngle = 0;
-    int intendedArmTurnstileClicks = 0;
-    int lastIntendedArmTurnstileClicks = intendedArmTurnstileClicks;
-    double armTurnstileAdjustPower = 0.01;
+    double tset_turnstile_position = 0.85;
+    double tset_pivot_position = 0.8;
 
     @Override
     public void runOpMode() {
@@ -67,8 +63,8 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
 
         // Set servo initial positions
         robot.setOdoPodsUp();
-        robot.TSET_Turnstile.setPosition(0.85);
-        robot.TSET_Pivot.setPosition(0.8);
+        robot.TSET_Turnstile.setPosition(tset_turnstile_position);
+        robot.TSET_Pivot.setPosition(tset_pivot_position);
         robot.TSET_Extender1.setPosition(0.5);
         robot.TSET_Extender2.setPosition(0.5);
 
@@ -165,65 +161,38 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             //  ######    GAMEPAD2 (B) CONTROLS (arm & TSE turret)    ######
 
             // Controls for the arm
-            //        left_stick_y -> power up and down
-            //        right_stick -> field-centric turnstile turning (270 deg either way)
-            //        left_trigger || right_trigger -> turn turnstile so arm is at the front of the robot
             robot.armHinge.setPower(gamepad2.left_stick_y);
-
-//            lastIntendedArmTurnstileClicks = intendedArmTurnstileClicks;
-//            // 1- if g2.left_stick, set intended angle and from that and the robot's position derive intended clicks
-//            if (Math.abs(gamepad2.right_stick_x) + Math.abs(gamepad2.right_stick_y) > 0.6) {
-//                // get field-centric angle from joystick
-//                intendedArmTurnstileAngle = (Math.atan2(-gamepad2.right_stick_y, gamepad2.right_stick_x) - Math.PI / 2) * 180 / Math.PI;
-//            }
-//
-//            armTurnstileAngle = robot.armTurnstile.getCurrentPosition() / robot.ARM_TURNSTILE_CLICKS_PER_DEG;
-//
-//            // convert that angle to a robot-relative angle
-//            intendedArmTurnstileAngle = (intendedArmTurnstileAngle - position.angle + 720) % 360;
-//            if (intendedArmTurnstileAngle > 180) { intendedArmTurnstileAngle -= 360; }
-//
-//            diff = intendedArmTurnstileAngle - armTurnstileAngle;
-//            if (diff > 180 && intendedArmTurnstileAngle + 360 < robot.ARM_TURNSTILE_MAX_DEG) {
-//                intendedArmTurnstileAngle += 360;
-//            } else if (diff < -180 && intendedArmTurnstileAngle - 360 > -robot.ARM_TURNSTILE_MAX_DEG) {
-//                intendedArmTurnstileAngle -= 360;
-//            }
-//
-//            intendedArmTurnstileClicks = (int)(intendedArmTurnstileAngle * robot.ARM_TURNSTILE_CLICKS_PER_DEG);
-//
-//            // 2- if g2.left_trigger or g2.right_trigger, set intended clicks to 0.
-//            if (gamepad2.left_trigger > 0.2 || gamepad2.right_trigger > 0.2) {
-//                intendedArmTurnstileClicks = 0;
-//            }
-//            // 3- turn arm to intended clicks if the desired position has changed.
-//            // TODO: Stop arm turnstile if arm hinge is lowered?
-//            if (lastIntendedArmTurnstileClicks != intendedArmTurnstileClicks) {
-//                robot.motorTurnNoReset(Math.abs(robot.armTurnstile.getCurrentPosition() - intendedArmTurnstileClicks) * armTurnstileAdjustPower,
-//                        intendedArmTurnstileClicks, robot.armTurnstile);
-//            }
-
             robot.armTurnstile.setPower(-gamepad2.right_stick_x);
-            telemetry.addData("intended clicks for arm", intendedArmTurnstileClicks);
-            telemetry.addData("actual clicks for arm", robot.armTurnstile.getCurrentPosition());
+            telemetry.addData("clicks for arm turnstile", robot.armTurnstile.getCurrentPosition());
+            telemetry.addData("clicks for arm hinge", robot.armHinge.getCurrentPosition());
 
 
             // Team Shipping Element Turret controls
-            if (gamepad2.left_bumper) {
-                robot.TSET_Turnstile.setPosition(robot.TSET_Turnstile.getPosition() - TSET_TURNSTILE_INCREMENT);
+            if (gamepad2.left_trigger > 0.2) {
+                tset_turnstile_position -= TSET_TURNSTILE_INCREMENT;
+            } else if (gamepad2.right_trigger > 0.2) {
+                tset_turnstile_position += TSET_TURNSTILE_INCREMENT;
+            } else if (gamepad2.left_bumper) {
+                tset_turnstile_position -= TSET_TURNSTILE_INCREMENT/3;
             } else if (gamepad2.right_bumper) {
-                robot.TSET_Turnstile.setPosition(robot.TSET_Turnstile.getPosition() + TSET_TURNSTILE_INCREMENT);
-            } else if (gamepad2.x) {
-                robot.TSET_Turnstile.setPosition(robot.TSET_Turnstile.getPosition() - TSET_TURNSTILE_INCREMENT/3);
-            } else if (gamepad2.b) {
-                robot.TSET_Turnstile.setPosition(robot.TSET_Turnstile.getPosition() + TSET_TURNSTILE_INCREMENT/3);
+                tset_turnstile_position += TSET_TURNSTILE_INCREMENT/3;
             }
+            if (tset_turnstile_position > 1) {tset_turnstile_position = 1;}
+            if (tset_turnstile_position < 0) {tset_turnstile_position = 0;}
+            robot.TSET_Turnstile.setPosition(tset_turnstile_position);
 
             if (gamepad2.dpad_down) {
-                robot.TSET_Pivot.setPosition(robot.TSET_Pivot.getPosition() + TSET_PIVOT_INCREMENT);
+                tset_pivot_position += TSET_PIVOT_INCREMENT;
             } else if (gamepad2.dpad_up) {
-                robot.TSET_Pivot.setPosition(robot.TSET_Pivot.getPosition() - TSET_PIVOT_INCREMENT);
+                tset_pivot_position -= TSET_PIVOT_INCREMENT;
+            } else if (gamepad2.dpad_left) {
+                tset_pivot_position -= TSET_PIVOT_INCREMENT/3;
+            } else if (gamepad2.dpad_right) {
+                tset_pivot_position -= TSET_PIVOT_INCREMENT/3;
             }
+            if (tset_pivot_position > 1) {tset_pivot_position = 1;}
+            if (tset_pivot_position < 0) {tset_pivot_position = 0;}
+            robot.TSET_Pivot.setPosition(tset_pivot_position);
 
             if (gamepad2.a) {
                 robot.TSET_Extender1.setPosition(0);
