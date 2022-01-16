@@ -70,7 +70,8 @@ public class FreightFrenzy_BaseAutoSetup extends LinearOpMode {
         robot.setOdoPodsDown();
         robot.TSET_Turnstile.setPosition(0.85);
         robot.TSET_Pivot.setPosition(0.4);
-        robot.TSET_Extender.setPosition(0.5);
+        robot.TSET_Extender1.setPosition(0.5);
+        robot.TSET_Extender2.setPosition(0.5);
 
 
         while (!isStarted() && !isStopRequested()) {

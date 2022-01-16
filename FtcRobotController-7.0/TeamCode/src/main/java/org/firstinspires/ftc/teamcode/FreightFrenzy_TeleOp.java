@@ -2,10 +2,12 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @TeleOp(name="Freight Frenzy Drive")
 public class FreightFrenzy_TeleOp extends LinearOpMode {
@@ -32,8 +34,8 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     int last_intake_switch = (int)System.currentTimeMillis();
     public boolean run_intake = false;
 
-    final double TSET_TURNSTILE_INCREMENT = 0.004;
-    final double TSET_PIVOT_INCREMENT = 0.015;
+    final double TSET_TURNSTILE_INCREMENT = 0.006;
+    final double TSET_PIVOT_INCREMENT = 0.007;
 
     double intendedArmTurnstileAngle = adjustAngle;
     double diff;
@@ -64,10 +66,14 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
         waitForStart();
 
         // Set servo initial positions
-        robot.setOdoPodsDown();
+        robot.setOdoPodsUp();
         robot.TSET_Turnstile.setPosition(0.85);
-        robot.TSET_Pivot.setPosition(0.4);
-        robot.TSET_Extender.setPosition(0.5);
+        robot.TSET_Pivot.setPosition(0.8);
+        robot.TSET_Extender1.setPosition(0.5);
+        robot.TSET_Extender2.setPosition(0.5);
+
+        robot.armTurnstile.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.armHinge.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // run until the end of the match (driver presses STOP)
         OdometryPosition position;
@@ -88,7 +94,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
                 }
             }
             if (gamepad1.left_stick_x != 0 || gamepad1.left_stick_y != 0) {
-                leftStickAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) + (Math.PI * 1 / 4); // TODO: test and make sure the robot goes in the correct direction.
+                leftStickAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) + (Math.PI * 5 / 4); // TODO: test and make sure the robot goes in the correct direction.
                 if (leftStickAngle >= Math.PI) {
                     leftStickAngle -= Math.PI * 2;
                 }
@@ -164,37 +170,42 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             //        left_trigger || right_trigger -> turn turnstile so arm is at the front of the robot
             robot.armHinge.setPower(gamepad2.left_stick_y);
 
-            lastIntendedArmTurnstileClicks = intendedArmTurnstileClicks;
-            // 1- if g2.left_stick, set intended angle and from that and the robot's position derive intended clicks
-            if (Math.abs(gamepad2.right_stick_x) + Math.abs(gamepad2.right_stick_y) > 0.6) {
-                // get field-centric angle from joystick
-                intendedArmTurnstileAngle = (Math.atan2(-gamepad2.right_stick_y, gamepad2.right_stick_x) - Math.PI / 2) * 180 / Math.PI;
-                armTurnstileAngle = robot.armTurnstile.getCurrentPosition() / robot.ARM_TURNSTILE_CLICKS_PER_DEG;
+//            lastIntendedArmTurnstileClicks = intendedArmTurnstileClicks;
+//            // 1- if g2.left_stick, set intended angle and from that and the robot's position derive intended clicks
+//            if (Math.abs(gamepad2.right_stick_x) + Math.abs(gamepad2.right_stick_y) > 0.6) {
+//                // get field-centric angle from joystick
+//                intendedArmTurnstileAngle = (Math.atan2(-gamepad2.right_stick_y, gamepad2.right_stick_x) - Math.PI / 2) * 180 / Math.PI;
+//            }
+//
+//            armTurnstileAngle = robot.armTurnstile.getCurrentPosition() / robot.ARM_TURNSTILE_CLICKS_PER_DEG;
+//
+//            // convert that angle to a robot-relative angle
+//            intendedArmTurnstileAngle = (intendedArmTurnstileAngle - position.angle + 720) % 360;
+//            if (intendedArmTurnstileAngle > 180) { intendedArmTurnstileAngle -= 360; }
+//
+//            diff = intendedArmTurnstileAngle - armTurnstileAngle;
+//            if (diff > 180 && intendedArmTurnstileAngle + 360 < robot.ARM_TURNSTILE_MAX_DEG) {
+//                intendedArmTurnstileAngle += 360;
+//            } else if (diff < -180 && intendedArmTurnstileAngle - 360 > -robot.ARM_TURNSTILE_MAX_DEG) {
+//                intendedArmTurnstileAngle -= 360;
+//            }
+//
+//            intendedArmTurnstileClicks = (int)(intendedArmTurnstileAngle * robot.ARM_TURNSTILE_CLICKS_PER_DEG);
+//
+//            // 2- if g2.left_trigger or g2.right_trigger, set intended clicks to 0.
+//            if (gamepad2.left_trigger > 0.2 || gamepad2.right_trigger > 0.2) {
+//                intendedArmTurnstileClicks = 0;
+//            }
+//            // 3- turn arm to intended clicks if the desired position has changed.
+//            // TODO: Stop arm turnstile if arm hinge is lowered?
+//            if (lastIntendedArmTurnstileClicks != intendedArmTurnstileClicks) {
+//                robot.motorTurnNoReset(Math.abs(robot.armTurnstile.getCurrentPosition() - intendedArmTurnstileClicks) * armTurnstileAdjustPower,
+//                        intendedArmTurnstileClicks, robot.armTurnstile);
+//            }
 
-                // convert that angle to a robot-relative angle
-                intendedArmTurnstileAngle = (intendedArmTurnstileAngle - position.angle + 720) % 360;
-                if (intendedArmTurnstileAngle > 180) { intendedArmTurnstileAngle -= 360; }
-
-                diff = intendedArmTurnstileAngle - armTurnstileAngle;
-                if (diff > 180 && intendedArmTurnstileAngle + 360 < robot.ARM_TURNSTILE_MAX_DEG) {
-                    intendedArmTurnstileAngle += 360;
-                } else if (diff < -180 && intendedArmTurnstileAngle - 360 > -robot.ARM_TURNSTILE_MAX_DEG) {
-                    intendedArmTurnstileAngle -= 360;
-                }
-
-                intendedArmTurnstileClicks = (int)(intendedArmTurnstileAngle * robot.ARM_TURNSTILE_CLICKS_PER_DEG);
-            }
-            // 2- if g2.left_trigger or g2.right_trigger, set intended clicks to 0.
-            if (gamepad2.left_trigger > 0.2 || gamepad2.right_trigger > 0.2) {
-                intendedArmTurnstileClicks = 0;
-            }
-            // 3- turn arm to intended clicks if the desired position has changed.
-            // TODO: Stop arm turnstile if arm hinge is lowered?
-            if (lastIntendedArmTurnstileClicks != intendedArmTurnstileClicks) {
-                robot.motorTurnNoReset(Math.abs(robot.armTurnstile.getCurrentPosition() - intendedArmTurnstileClicks) * armTurnstileAdjustPower,
-                        intendedArmTurnstileClicks, robot.armTurnstile);
-            }
+            robot.armTurnstile.setPower(-gamepad2.right_stick_x);
             telemetry.addData("intended clicks for arm", intendedArmTurnstileClicks);
+            telemetry.addData("actual clicks for arm", robot.armTurnstile.getCurrentPosition());
 
 
             // Team Shipping Element Turret controls
@@ -202,24 +213,32 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
                 robot.TSET_Turnstile.setPosition(robot.TSET_Turnstile.getPosition() - TSET_TURNSTILE_INCREMENT);
             } else if (gamepad2.right_bumper) {
                 robot.TSET_Turnstile.setPosition(robot.TSET_Turnstile.getPosition() + TSET_TURNSTILE_INCREMENT);
+            } else if (gamepad2.x) {
+                robot.TSET_Turnstile.setPosition(robot.TSET_Turnstile.getPosition() - TSET_TURNSTILE_INCREMENT/3);
+            } else if (gamepad2.b) {
+                robot.TSET_Turnstile.setPosition(robot.TSET_Turnstile.getPosition() + TSET_TURNSTILE_INCREMENT/3);
             }
 
             if (gamepad2.dpad_down) {
-                robot.TSET_Pivot.setPosition(robot.TSET_Pivot.getPosition() - TSET_PIVOT_INCREMENT);
-            } else if (gamepad2.dpad_up) {
                 robot.TSET_Pivot.setPosition(robot.TSET_Pivot.getPosition() + TSET_PIVOT_INCREMENT);
+            } else if (gamepad2.dpad_up) {
+                robot.TSET_Pivot.setPosition(robot.TSET_Pivot.getPosition() - TSET_PIVOT_INCREMENT);
             }
 
             if (gamepad2.a) {
-                robot.TSET_Extender.setPosition(0);
+                robot.TSET_Extender1.setPosition(0);
+                robot.TSET_Extender2.setPosition(1);
             } else if (gamepad2.y) {
-                robot.TSET_Extender.setPosition(1);
+                robot.TSET_Extender1.setPosition(1);
+                robot.TSET_Extender2.setPosition(0);
             } else {
-                robot.TSET_Extender.setPosition(0.5);
+                robot.TSET_Extender1.setPosition(0.5);
+                robot.TSET_Extender2.setPosition(0.5);
             }
 
             telemetry.addData("Odo-given X", position.x);
             telemetry.addData("Odo-given Y", position.y);
+            telemetry.addData("distance sensor reading", robot.distanceSensor.getDistance(DistanceUnit.MM));
             /////////////////     UPDATE TELEMETRY     /////////////////
             telemetry.update();
         }

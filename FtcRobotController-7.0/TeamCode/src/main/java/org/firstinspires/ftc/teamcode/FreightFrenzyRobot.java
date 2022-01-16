@@ -35,7 +35,8 @@ class FreightFrenzyRobot {
     /**
      * A continuously rotating servo that extends and retracts the tape measure that scores the Team Shipping Element.
      */
-    public Servo TSET_Extender;
+    public Servo TSET_Extender1;
+    public Servo TSET_Extender2;
     /**
      * detects if anything is in the intake hand
      */
@@ -68,7 +69,7 @@ class FreightFrenzyRobot {
      */
     public final double CM_FOR_NO_FREIGHT = 9.0;
 
-    public final int DUCK_SPINNER_VELOCITY = 400;
+    public final int DUCK_SPINNER_VELOCITY = 2500;
 
     public final double INTAKE_ON_POWER = 1;
     public final double INTAKE_OUTPUT_POWER = -0.45;
@@ -99,7 +100,8 @@ class FreightFrenzyRobot {
         yOdoPodLift = hardwareMap.get(Servo.class, "yOdoPodLift");
         TSET_Turnstile = hardwareMap.get(Servo.class, "TSET_Turnstile");
         TSET_Pivot = hardwareMap.get(Servo.class, "TSET_Pivot");
-        TSET_Extender = hardwareMap.get(Servo.class, "TSET_Extender");
+        TSET_Extender1 = hardwareMap.get(Servo.class, "TSET_Extender1");
+        TSET_Extender2 = hardwareMap.get(Servo.class, "TSET_Extender2");
 
         distanceSensor = hardwareMap.get(Rev2mDistanceSensor.class, "distanceSensor"); // TODO: actually configure this sensor
 
@@ -111,12 +113,15 @@ class FreightFrenzyRobot {
         armTurnstile.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armTurnstile.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         armTurnstile.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armTurnstile.setDirection(DcMotorSimple.Direction.REVERSE);
         armHinge.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armHinge.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         armHinge.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         duckSpinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         duckSpinner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         duckSpinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         odometer = new Odometer(0, 0, 0);
         odometer.init(imu, wheel1, wheel2);
