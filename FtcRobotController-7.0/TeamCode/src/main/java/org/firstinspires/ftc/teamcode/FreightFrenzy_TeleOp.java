@@ -34,11 +34,11 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     int last_intake_switch = (int)System.currentTimeMillis();
     public boolean run_intake = false;
 
-    final double TSET_TURNSTILE_INCREMENT = 0.01;
+    final double TSET_TURNSTILE_INCREMENT = 0.015;
     final double TSET_PIVOT_INCREMENT = 0.02;
 
-    double tset_turnstile_position = 0.67;
-    double tset_pivot_position = 0.55;
+    double tset_turnstile_position = 0.8;
+    double tset_pivot_position = 0.8;
 
     private double intakePower = 0;
 
@@ -172,9 +172,9 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             } else if (gamepad2.right_trigger > 0.2) {
                 tset_turnstile_position += TSET_TURNSTILE_INCREMENT;
             } else if (gamepad2.left_bumper) {
-                tset_turnstile_position -= TSET_TURNSTILE_INCREMENT/4;
+                tset_turnstile_position -= TSET_TURNSTILE_INCREMENT/6;
             } else if (gamepad2.right_bumper) {
-                tset_turnstile_position += TSET_TURNSTILE_INCREMENT/4;
+                tset_turnstile_position += TSET_TURNSTILE_INCREMENT/6;
             }
             if (tset_turnstile_position > 1) {tset_turnstile_position = 1;}
             if (tset_turnstile_position < 0) {tset_turnstile_position = 0;}
