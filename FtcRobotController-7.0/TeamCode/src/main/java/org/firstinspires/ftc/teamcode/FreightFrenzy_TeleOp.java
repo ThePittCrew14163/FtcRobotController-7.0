@@ -34,11 +34,13 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     int last_intake_switch = (int)System.currentTimeMillis();
     public boolean run_intake = false;
 
-    final double TSET_TURNSTILE_INCREMENT = 0.006;
-    final double TSET_PIVOT_INCREMENT = 0.018;
+    final double TSET_TURNSTILE_INCREMENT = 0.01;
+    final double TSET_PIVOT_INCREMENT = 0.02;
 
-    double tset_turnstile_position = 0.85;
-    double tset_pivot_position = 0.8;
+    double tset_turnstile_position = 0.67;
+    double tset_pivot_position = 0.55;
+
+    private double intakePower = 0;
 
     @Override
     public void runOpMode() {
@@ -137,17 +139,14 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
 
             // ###################################################################
             //  ###### OTHER GAMEPAD1 (A) CONTROLS (intake & duck spinner) ######
-            if (gamepad1.left_bumper && (int)System.currentTimeMillis() - this.last_intake_switch >= intake_switch_delay) {
-                run_intake = !run_intake;
-                this.last_intake_switch = (int) System.currentTimeMillis();
+            if (gamepad1.left_bumper) {
+                intakePower = 0;
+            } else if (gamepad1.right_bumper) {
+                intakePower = robot.INTAKE_OUTPUT_POWER;
+            } else if (gamepad1.left_trigger > 0.2) {
+                intakePower = gamepad1.left_trigger + 0.1;
             }
-            if (gamepad1.right_bumper) {
-                robot.intake.setPower(robot.INTAKE_OUTPUT_POWER);
-            } else if (!run_intake) {
-                robot.intake.setPower(0);
-            } else {
-                robot.intake.setPower(robot.INTAKE_ON_POWER);
-            }
+            robot.intake.setPower(intakePower);
 
             if (gamepad1.dpad_left) {
                 robot.duckSpinner.setVelocity(-robot.DUCK_SPINNER_VELOCITY);
@@ -161,8 +160,8 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             //  ######    GAMEPAD2 (B) CONTROLS (arm & TSE turret)    ######
 
             // Controls for the arm
-            robot.armHinge.setPower(gamepad2.left_stick_y);
-            robot.armTurnstile.setPower(-gamepad2.right_stick_x);
+            robot.armHinge.setPower(gamepad2.left_stick_y/1.7);
+            robot.armTurnstile.setPower(-gamepad2.right_stick_x/2);
             telemetry.addData("clicks for arm turnstile", robot.armTurnstile.getCurrentPosition());
             telemetry.addData("clicks for arm hinge", robot.armHinge.getCurrentPosition());
 
@@ -173,9 +172,9 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             } else if (gamepad2.right_trigger > 0.2) {
                 tset_turnstile_position += TSET_TURNSTILE_INCREMENT;
             } else if (gamepad2.left_bumper) {
-                tset_turnstile_position -= TSET_TURNSTILE_INCREMENT/3;
+                tset_turnstile_position -= TSET_TURNSTILE_INCREMENT/4;
             } else if (gamepad2.right_bumper) {
-                tset_turnstile_position += TSET_TURNSTILE_INCREMENT/3;
+                tset_turnstile_position += TSET_TURNSTILE_INCREMENT/4;
             }
             if (tset_turnstile_position > 1) {tset_turnstile_position = 1;}
             if (tset_turnstile_position < 0) {tset_turnstile_position = 0;}
@@ -188,7 +187,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             } else if (gamepad2.dpad_left) {
                 tset_pivot_position -= TSET_PIVOT_INCREMENT/3;
             } else if (gamepad2.dpad_right) {
-                tset_pivot_position -= TSET_PIVOT_INCREMENT/3;
+                tset_pivot_position += TSET_PIVOT_INCREMENT/3;
             }
             if (tset_pivot_position > 1) {tset_pivot_position = 1;}
             if (tset_pivot_position < 0) {tset_pivot_position = 0;}
@@ -207,7 +206,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
 
             telemetry.addData("Odo-given X", position.x);
             telemetry.addData("Odo-given Y", position.y);
-            telemetry.addData("distance sensor reading", robot.distanceSensor.getDistance(DistanceUnit.MM));
+            telemetry.addData("distance sensor reading", robot.distanceSensor.getDistance(DistanceUnit.CM));
             /////////////////     UPDATE TELEMETRY     /////////////////
             telemetry.update();
         }
