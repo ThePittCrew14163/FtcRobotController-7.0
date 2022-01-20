@@ -160,8 +160,8 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
             //  ######    GAMEPAD2 (B) CONTROLS (arm & TSE turret)    ######
 
             // Controls for the arm
-            robot.armHinge.setPower(gamepad2.left_stick_y/1.7);
-            robot.armTurnstile.setPower(-gamepad2.right_stick_x/2);
+            robot.armHinge.setPower(gamepad2.left_stick_y/1.5);
+            robot.armTurnstile.setPower(-gamepad2.right_stick_x/1.7);
             telemetry.addData("clicks for arm turnstile", robot.armTurnstile.getCurrentPosition());
             telemetry.addData("clicks for arm hinge", robot.armHinge.getCurrentPosition());
 
