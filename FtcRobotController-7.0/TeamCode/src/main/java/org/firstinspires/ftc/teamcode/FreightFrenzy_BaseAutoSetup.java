@@ -68,11 +68,7 @@ public class FreightFrenzy_BaseAutoSetup extends LinearOpMode {
 
         // Set servo initial positions
         robot.setOdoPodsDown();
-        robot.TSET_Turnstile.setPosition(0.85);
-        robot.TSET_Pivot.setPosition(0.4);
-        robot.TSET_Extender1.setPosition(0.5);
-        robot.TSET_Extender2.setPosition(0.5);
-
+        robot.setTSETtoInitPosition();
 
         while (!isStarted() && !isStopRequested()) {
             tse_position = pipeline.tse_position;

@@ -34,11 +34,11 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
     int last_intake_switch = (int)System.currentTimeMillis();
     public boolean run_intake = false;
 
-    final double TSET_TURNSTILE_INCREMENT = 0.015;
+    final double TSET_TURNSTILE_INCREMENT = 0.05;
     final double TSET_PIVOT_INCREMENT = 0.02;
 
-    double tset_turnstile_position = 0.8;
-    double tset_pivot_position = 0.8;
+    double tset_turnstile_position = 1;
+    double tset_pivot_position = 0.75;
 
     private double intakePower = 0;
 
@@ -65,10 +65,7 @@ public class FreightFrenzy_TeleOp extends LinearOpMode {
 
         // Set servo initial positions
         robot.setOdoPodsUp();
-        robot.TSET_Turnstile.setPosition(tset_turnstile_position);
-        robot.TSET_Pivot.setPosition(tset_pivot_position);
-        robot.TSET_Extender1.setPosition(0.5);
-        robot.TSET_Extender2.setPosition(0.5);
+        robot.setTSETtoInitPosition();
 
         robot.armTurnstile.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.armHinge.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
